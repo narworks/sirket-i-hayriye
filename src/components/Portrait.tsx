@@ -2,6 +2,7 @@
 
 import { motion, useInView } from "framer-motion";
 import { useRef } from "react";
+import Image from "next/image";
 import { OttomanDivider } from "./OttomanBorder";
 
 export function Portrait() {
@@ -27,15 +28,15 @@ export function Portrait() {
               {/* Ornate frame */}
               <div className="relative overflow-hidden rounded-full border-4 border-ottoman-gold/40 p-2">
                 <div className="overflow-hidden rounded-full border-2 border-ottoman-gold/20 bg-ottoman-navy/10">
-                  {/* Portrait placeholder — will be replaced with AI-generated image */}
-                  <div className="flex h-56 w-56 items-center justify-center rounded-full bg-gradient-to-b from-ottoman-sepia/20 to-ottoman-navy/15 md:h-72 md:w-72">
-                    <svg viewBox="0 0 100 100" className="h-32 w-32 text-ottoman-navy/20" fill="currentColor">
-                      <circle cx="50" cy="35" r="18" />
-                      <ellipse cx="50" cy="85" rx="30" ry="22" />
-                      {/* Fez hat */}
-                      <rect x="36" y="14" width="28" height="6" rx="1" fill="#8b0000" opacity="0.3" />
-                      <rect x="38" y="8" width="24" height="8" rx="3" fill="#8b0000" opacity="0.3" />
-                    </svg>
+                  <div className="relative h-56 w-56 overflow-hidden rounded-full md:h-72 md:w-72">
+                    <Image
+                      src="/images/portre-huseyin-haki.jpg"
+                      alt="Hüseyin Haki Efendi - Şirket-i Hayriye Müdürü (1867-1894)"
+                      fill
+                      className="object-cover object-top sepia-[0.3] contrast-[1.1]"
+                      sizes="(max-width: 768px) 224px, 288px"
+                      priority
+                    />
                   </div>
                 </div>
               </div>
