@@ -1,0 +1,177 @@
+@import "tailwindcss";
+
+@theme inline {
+  /* Ottoman Color Palette */
+  --color-ottoman-navy: #1a2744;
+  --color-ottoman-navy-light: #2a3d5c;
+  --color-ottoman-gold: #c9a84c;
+  --color-ottoman-gold-light: #dbc278;
+  --color-ottoman-gold-dark: #a88a2e;
+  --color-ottoman-sepia: #d4a574;
+  --color-ottoman-sepia-light: #e8c9a0;
+  --color-ottoman-parchment: #f5efe0;
+  --color-ottoman-parchment-dark: #e8dcc8;
+  --color-ottoman-cream: #faf6ed;
+  --color-ottoman-red: #8b0000;
+  --color-ottoman-sea: #1e6fa0;
+  --color-ottoman-sea-light: #3a8cc4;
+  --color-ottoman-bronze: #8b6914;
+  --color-ottoman-copper: #7a4e2d;
+  --color-ottoman-ink: #2c1810;
+
+  /* Spacing */
+  --section-padding: 5rem;
+}
+
+/* ---- Base Styles ---- */
+
+:root {
+  --background: #f5efe0;
+  --foreground: #2c1810;
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: "Source Serif 4", Georgia, "Times New Roman", serif;
+  overflow-x: hidden;
+}
+
+/* Smooth scrolling */
+html {
+  scroll-behavior: smooth;
+}
+
+/* ---- Ottoman Decorative Utilities ---- */
+
+.text-gradient-gold {
+  background: linear-gradient(135deg, #c9a84c 0%, #dbc278 50%, #a88a2e 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.bg-parchment-texture {
+  background-color: #f5efe0;
+  background-image:
+    radial-gradient(ellipse at 20% 50%, rgba(212, 165, 116, 0.15) 0%, transparent 50%),
+    radial-gradient(ellipse at 80% 20%, rgba(201, 168, 76, 0.08) 0%, transparent 50%),
+    radial-gradient(ellipse at 50% 80%, rgba(139, 105, 20, 0.05) 0%, transparent 50%);
+}
+
+.border-ottoman {
+  border: 2px solid #c9a84c;
+  border-image: linear-gradient(135deg, #a88a2e, #dbc278, #c9a84c, #dbc278, #a88a2e) 1;
+}
+
+/* Ottoman ornamental divider */
+.ottoman-divider {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1rem 0;
+}
+
+.ottoman-divider::before,
+.ottoman-divider::after {
+  content: "";
+  flex: 1;
+  height: 1px;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    #c9a84c 20%,
+    #c9a84c 80%,
+    transparent
+  );
+}
+
+/* Scroll animation base */
+.scroll-reveal {
+  opacity: 0;
+  transform: translateY(40px);
+  transition: opacity 0.8s ease, transform 0.8s ease;
+}
+
+.scroll-reveal.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* Gold shimmer animation */
+@keyframes shimmer {
+  0% { background-position: -200% center; }
+  100% { background-position: 200% center; }
+}
+
+.gold-shimmer {
+  background: linear-gradient(
+    90deg,
+    #c9a84c 0%,
+    #dbc278 25%,
+    #f5e6b8 50%,
+    #dbc278 75%,
+    #c9a84c 100%
+  );
+  background-size: 200% auto;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  animation: shimmer 3s linear infinite;
+}
+
+/* Parchment fade edges */
+.parchment-edges {
+  position: relative;
+}
+
+.parchment-edges::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background:
+    linear-gradient(to right, #f5efe0, transparent 5%, transparent 95%, #f5efe0),
+    linear-gradient(to bottom, #f5efe0, transparent 3%, transparent 97%, #f5efe0);
+  z-index: 1;
+}
+
+/* Section transitions */
+.section-transition {
+  position: relative;
+}
+
+.section-transition::after {
+  content: "";
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 60%;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, #c9a84c, transparent);
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #f5efe0;
+}
+
+::-webkit-scrollbar-thumb {
+  background: linear-gradient(180deg, #c9a84c, #a88a2e);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(180deg, #dbc278, #c9a84c);
+}
+
+/* Selection color */
+::selection {
+  background: rgba(201, 168, 76, 0.3);
+  color: #1a2744;
+}
