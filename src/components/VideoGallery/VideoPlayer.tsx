@@ -19,6 +19,7 @@ interface ReactPlayerProps {
   onEnded?: () => void;
   progressInterval?: number;
   style?: React.CSSProperties;
+  config?: Record<string, unknown>;
 }
 
 // react-player SSR uyumluluğu için dynamic import
@@ -93,7 +94,7 @@ export function VideoPlayer({
         initial="enter"
         animate="center"
         exit="exit"
-        className="absolute inset-0"
+        className="absolute inset-0 flex items-center justify-center"
       >
         <ReactPlayer
           url={video.url}
@@ -107,15 +108,31 @@ export function VideoPlayer({
           onDuration={handleDuration}
           onEnded={onEnded}
           progressInterval={500}
+          config={{
+            youtube: {
+              playerVars: {
+                autoplay: 1,
+                modestbranding: 1,
+                rel: 0,
+                showinfo: 0,
+                iv_load_policy: 3,
+                fs: 0,
+                playsinline: 1,
+              },
+            },
+            vimeo: {
+              playerOptions: {
+                autoplay: true,
+                byline: false,
+                portrait: false,
+                title: false,
+              },
+            },
+          }}
           style={{
             position: "absolute",
-            top: "50%",
-            left: "50%",
-            transform: "translate(-50%, -50%)",
-            minWidth: "100%",
-            minHeight: "100%",
-            width: "auto",
-            height: "auto",
+            top: 0,
+            left: 0,
           }}
         />
       </motion.div>
