@@ -73,17 +73,17 @@ export function VideoOverlay({ showLogo, children }: VideoOverlayProps) {
             className="pointer-events-none absolute top-6 left-6 z-20"
           >
             {/* Logo container with dark background */}
-            <div className="rounded-lg bg-black/60 px-6 py-4 backdrop-blur-sm">
+            <div className="rounded-xl border border-ottoman-gold/30 bg-black/80 px-8 py-5 shadow-2xl backdrop-blur-md">
               <h1
-                className="font-['Playfair_Display'] text-xl font-bold text-white md:text-2xl"
+                className="font-['Playfair_Display'] text-2xl font-bold text-white md:text-3xl"
                 style={{
-                  textShadow: "0 0 20px rgba(201, 168, 76, 0.5)",
+                  textShadow: "0 0 30px rgba(201, 168, 76, 0.6)",
                 }}
               >
                 Şirket-i Hayriye
               </h1>
-              <p className="mt-1 font-['Cinzel'] text-sm tracking-[0.3em] text-ottoman-gold">
-                1851
+              <p className="mt-2 font-['Cinzel'] text-base tracking-[0.4em] text-ottoman-gold md:text-lg">
+                • 1851 •
               </p>
             </div>
           </motion.div>

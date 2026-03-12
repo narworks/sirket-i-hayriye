@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useEffect, useState } from "react";
+import { useRef, useEffect, useState, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import type { VideoContent } from "@/lib/types";
 
@@ -41,16 +41,50 @@ export function VideoPlayer({
   const [isLoaded, setIsLoaded] = useState(false);
   const progressIntervalRef = useRef<NodeJS.Timeout | null>(null);
   const startTimeRef = useRef<number>(0);
+  const nearEndTriggeredRef = useRef(false);
 
   const videoId = getYouTubeId(video.url);
+
+  // YouTube iframe'e komut gönder
+  const sendCommand = useCallback((command: string, args?: unknown) => {
+    if (iframeRef.current?.contentWindow) {
+      const message = JSON.stringify({
+        event: "command",
+        func: command,
+        args: args ? [args] : [],
+      });
+      iframeRef.current.contentWindow.postMessage(message, "*");
+    }
+  }, []);
+
+  // Mute/unmute kontrolü
+  useEffect(() => {
+    if (!isLoaded) return;
+    if (isMuted) {
+      sendCommand("mute");
+    } else {
+      sendCommand("unMute");
+    }
+  }, [isMuted, isLoaded, sendCommand]);
+
+  // Play/pause kontrolü
+  useEffect(() => {
+    if (!isLoaded) return;
+    if (isPlaying) {
+      sendCommand("playVideo");
+    } else {
+      sendCommand("pauseVideo");
+    }
+  }, [isPlaying, isLoaded, sendCommand]);
 
   // Video yüklendiğinde
   const handleLoad = () => {
     setIsLoaded(true);
     onReady();
     startTimeRef.current = Date.now();
+    nearEndTriggeredRef.current = false;
 
-    // Progress simülasyonu (YouTube iframe API olmadan)
+    // Progress simülasyonu
     if (progressIntervalRef.current) {
       clearInterval(progressIntervalRef.current);
     }
@@ -62,7 +96,8 @@ export function VideoPlayer({
       onProgress(progress, estimatedDuration);
 
       // Son 5 saniyeye yaklaşınca
-      if (elapsed >= estimatedDuration - 5) {
+      if (elapsed >= estimatedDuration - 5 && !nearEndTriggeredRef.current) {
+        nearEndTriggeredRef.current = true;
         onNearEnd();
       }
 
@@ -89,6 +124,7 @@ export function VideoPlayer({
   useEffect(() => {
     setIsLoaded(false);
     startTimeRef.current = 0;
+    nearEndTriggeredRef.current = false;
     if (progressIntervalRef.current) {
       clearInterval(progressIntervalRef.current);
     }
@@ -102,8 +138,8 @@ export function VideoPlayer({
     );
   }
 
-  // YouTube embed URL - autoplay için mute=1 zorunlu (browser policy)
-  const embedUrl = `https://www.youtube.com/embed/${videoId}?autoplay=1&mute=1&controls=0&showinfo=0&rel=0&modestbranding=1&playsinline=1&enablejsapi=1&loop=0&origin=${typeof window !== 'undefined' ? window.location.origin : ''}`;
+  // YouTube embed URL - autoplay için mute=1 zorunlu, sonra API ile açılır
+  const embedUrl = `https://www.youtube.com/embed/${videoId}?autoplay=1&mute=1&controls=0&showinfo=0&rel=0&modestbranding=1&playsinline=1&enablejsapi=1&loop=0&origin=${typeof window !== "undefined" ? window.location.origin : ""}`;
 
   return (
     <AnimatePresence mode="wait">
@@ -132,7 +168,7 @@ export function VideoPlayer({
           onLoad={handleLoad}
           style={{
             border: "none",
-            pointerEvents: isPlaying ? "none" : "auto",
+            pointerEvents: "none",
           }}
         />
       </motion.div>
