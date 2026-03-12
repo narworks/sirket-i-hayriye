@@ -251,7 +251,8 @@ export function VideoPlayer({
         clearInterval(progressIntervalRef.current);
       }
     };
-  }, [apiReady, videoId, onReady, onProgress, onEnded, onNearEnd, isMuted]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [apiReady, videoId]);
 
   // Mute kontrolü
   useEffect(() => {
