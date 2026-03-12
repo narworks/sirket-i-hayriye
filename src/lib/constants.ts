@@ -101,14 +101,28 @@ export const VIDEO_GALLERY_CONFIG: VideoGalleryConfig = {
   storageKey: "sirket-galeri-muted", // Ses tercihi için
 };
 
-// Placeholder videolar - gerçek URL'ler eklenecek
+// Atmosferik İstanbul Boğazı videoları
+// Not: Bu videolar örnek olarak eklenmiştir, kendi videolarınızla değiştirebilirsiniz
 export const GALLERY_VIDEOS: VideoContent[] = [
   {
-    id: "intro",
-    title: "Boğaz'ın Hikayesi",
-    description: "Şirket-i Hayriye'nin kuruluş hikayesi",
-    url: "https://www.youtube.com/watch?v=dQw4w9WgXcQ", // Placeholder
+    id: "bogaz-yolculugu",
+    title: "Boğaz'da Bir Yolculuk",
+    description: "İstanbul Boğazı'nın eşsiz manzarası",
+    url: "https://www.youtube.com/watch?v=z6O3GIVXa2w", // Istanbul Bosphorus 4K
     year: "1851",
   },
-  // Daha fazla video buraya eklenecek
+  {
+    id: "istanbul-gundogumu",
+    title: "İstanbul'da Gün Doğumu",
+    description: "Boğaz'ın iki yakası arasında şafak",
+    url: "https://www.youtube.com/watch?v=Scxs7L0vhZ4", // Istanbul sunrise drone
+    year: "1854",
+  },
+  {
+    id: "vapur-seferi",
+    title: "Tarihi Vapur Seferi",
+    description: "Şehir Hatları vapurlarıyla nostaljik yolculuk",
+    url: "https://www.youtube.com/watch?v=8HqyKw1BCUU", // Istanbul ferry
+    year: "1872",
+  },
 ];
