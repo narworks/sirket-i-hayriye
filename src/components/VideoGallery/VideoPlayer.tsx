@@ -36,6 +36,8 @@ declare global {
         elementId: string,
         config: {
           videoId: string;
+          width?: number | string;
+          height?: number | string;
           playerVars?: Record<string, number | string>;
           events?: {
             onReady?: (event: { target: YTPlayer }) => void;
@@ -140,9 +142,15 @@ export function VideoPlayer({
     nearEndTriggeredRef.current = false;
     setIsLoaded(false);
 
+    // Tam ekran için boyutları ayarla
+    const width = window.innerWidth;
+    const height = window.innerHeight;
+
     // Yeni player oluştur
     playerRef.current = new window.YT.Player(playerId, {
       videoId: videoId,
+      width: width,
+      height: height,
       playerVars: {
         autoplay: 1,
         mute: 1, // Autoplay için zorunlu
@@ -286,12 +294,31 @@ export function VideoPlayer({
           </div>
         )}
 
-        {/* YouTube Player Container */}
+        {/* YouTube Player Container - tam ekran kaplama */}
         <div
           ref={containerRef}
-          className="absolute inset-0 h-full w-full"
-          style={{ pointerEvents: "none" }}
+          className="absolute inset-0 overflow-hidden"
+          style={{
+            pointerEvents: "none",
+            /* Video'yu ekrana sığdırmak için scale */
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+          }}
         />
+        {/* iframe'i tam ekran yapmak için global stil */}
+        <style jsx global>{`
+          #${playerIdRef.current} {
+            position: absolute !important;
+            top: 50% !important;
+            left: 50% !important;
+            transform: translate(-50%, -50%) !important;
+            min-width: 100vw !important;
+            min-height: 100vh !important;
+            width: 177.78vh !important; /* 16:9 aspect ratio */
+            height: 56.25vw !important;
+          }
+        `}</style>
       </motion.div>
     </AnimatePresence>
   );

@@ -126,51 +126,22 @@ export function VideoControls({
             </button>
           </div>
 
-          {/* Orta - Video kontrolleri */}
-          <div className="pointer-events-auto absolute top-1/2 left-1/2 flex -translate-x-1/2 -translate-y-1/2 items-center gap-6">
-            {/* Önceki video */}
-            {hasMultipleVideos && (
-              <button
-                onClick={onPrevVideo}
-                className="flex h-14 w-14 items-center justify-center rounded-full bg-black/30 text-white backdrop-blur-sm transition-all hover:bg-black/50 hover:scale-110"
-                aria-label="Önceki video"
-              >
-                <svg className="h-8 w-8" fill="currentColor" viewBox="0 0 24 24">
-                  <path d="M6 6h2v12H6V6zm3.5 6l8.5 6V6l-8.5 6z" />
-                </svg>
-              </button>
+          {/* Orta - Oynat/Durdur butonu */}
+          <button
+            onClick={onTogglePlay}
+            className="pointer-events-auto absolute top-1/2 left-1/2 flex h-20 w-20 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full bg-black/30 text-white backdrop-blur-sm transition-all hover:bg-black/50 hover:scale-110"
+            aria-label={isPlaying ? "Duraklat" : "Oynat"}
+          >
+            {isPlaying ? (
+              <svg className="h-10 w-10" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M6 4h4v16H6V4zm8 0h4v16h-4V4z" />
+              </svg>
+            ) : (
+              <svg className="h-10 w-10 ml-1" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M8 5v14l11-7z" />
+              </svg>
             )}
-
-            {/* Oynat/Durdur */}
-            <button
-              onClick={onTogglePlay}
-              className="flex h-20 w-20 items-center justify-center rounded-full bg-black/30 text-white backdrop-blur-sm transition-all hover:bg-black/50 hover:scale-110"
-              aria-label={isPlaying ? "Duraklat" : "Oynat"}
-            >
-              {isPlaying ? (
-                <svg className="h-10 w-10" fill="currentColor" viewBox="0 0 24 24">
-                  <path d="M6 4h4v16H6V4zm8 0h4v16h-4V4z" />
-                </svg>
-              ) : (
-                <svg className="h-10 w-10 ml-1" fill="currentColor" viewBox="0 0 24 24">
-                  <path d="M8 5v14l11-7z" />
-                </svg>
-              )}
-            </button>
-
-            {/* Sonraki video */}
-            {hasMultipleVideos && (
-              <button
-                onClick={onNextVideo}
-                className="flex h-14 w-14 items-center justify-center rounded-full bg-black/30 text-white backdrop-blur-sm transition-all hover:bg-black/50 hover:scale-110"
-                aria-label="Sonraki video"
-              >
-                <svg className="h-8 w-8" fill="currentColor" viewBox="0 0 24 24">
-                  <path d="M6 18l8.5-6L6 6v12zM16 6v12h2V6h-2z" />
-                </svg>
-              </button>
-            )}
-          </div>
+          </button>
 
           {/* Sağ alt - Atla butonu */}
           <AnimatePresence>
