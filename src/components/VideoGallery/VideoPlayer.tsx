@@ -283,18 +283,31 @@ export function VideoPlayer({
     }
   }, [isPlaying, isLoaded]);
 
-  // Cleanup
+  // Cleanup - component unmount olduğunda player'ı tamamen temizle
   useEffect(() => {
+    const playerId = playerIdRef.current;
+
     return () => {
+      // Progress interval'ı temizle
       if (progressIntervalRef.current) {
         clearInterval(progressIntervalRef.current);
+        progressIntervalRef.current = null;
       }
+
+      // Player'ı destroy et
       if (playerRef.current) {
         try {
           playerRef.current.destroy();
         } catch {
-          // Ignore
+          // Ignore destroy errors
         }
+        playerRef.current = null;
+      }
+
+      // Player div'ini DOM'dan kaldır
+      const playerDiv = document.getElementById(playerId);
+      if (playerDiv) {
+        playerDiv.remove();
       }
     };
   }, []);

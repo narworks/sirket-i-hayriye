@@ -91,8 +91,9 @@ export function VideoGallery() {
     <AnimatePresence>
       {state.isOpen && currentVideo && (
         <VideoOverlay showLogo={state.showLogo}>
-          {/* Video Player */}
+          {/* Video Player - key ile video değişince yeniden mount */}
           <VideoPlayer
+            key={currentVideo.id}
             video={currentVideo}
             isPlaying={state.isPlaying}
             isMuted={state.isMuted}
