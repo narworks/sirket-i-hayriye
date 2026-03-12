@@ -51,30 +51,39 @@ export function VideoGallery() {
   }, [dispatch]);
 
   const handleProgress = useCallback(
-    (progress: number) => {
+    (progress: number, _duration: number) => {
       dispatch({ type: "SET_PROGRESS", progress });
     },
     [dispatch]
   );
 
   const handleVideoEnd = useCallback(() => {
-    if (hasMultipleVideos) {
+    // Son video mu kontrol et
+    const isLastVideo = state.currentIndex === totalVideos - 1;
+
+    if (hasMultipleVideos && !isLastVideo) {
+      // Sonraki videoya geç
       dispatch({ type: "NEXT_VIDEO" });
     } else {
+      // Son video veya tek video - galeriyi kapat
       dispatch({ type: "CLOSE" });
     }
-  }, [dispatch, hasMultipleVideos]);
+  }, [dispatch, hasMultipleVideos, state.currentIndex, totalVideos]);
 
   const handleNearEnd = useCallback(() => {
-    // Ses fade out başlat (eğer sonraki video varsa)
-    if (hasMultipleVideos) {
-      // Logo'yu göster geçiş için
+    // Son video değilse logo göster
+    const isLastVideo = state.currentIndex === totalVideos - 1;
+    if (hasMultipleVideos && !isLastVideo) {
       dispatch({ type: "TOGGLE_LOGO" });
     }
-  }, [dispatch, hasMultipleVideos]);
+  }, [dispatch, hasMultipleVideos, state.currentIndex, totalVideos]);
 
   const handleSkip = useCallback(() => {
     dispatch({ type: "CLOSE" });
+  }, [dispatch]);
+
+  const handleToggleMute = useCallback(() => {
+    dispatch({ type: "TOGGLE_MUTE" });
   }, [dispatch]);
 
   const handleGoToVideo = useCallback(
@@ -104,11 +113,13 @@ export function VideoGallery() {
             onNearEnd={handleNearEnd}
           />
 
-          {/* Kontroller - sadece kapat ve atla */}
+          {/* Kontroller */}
           <VideoControls
             showSkipButton={showSkipButton}
+            isMuted={state.isMuted}
             onClose={handleClose}
             onSkip={handleSkip}
+            onToggleMute={handleToggleMute}
           />
 
           {/* İlerleme Göstergesi */}

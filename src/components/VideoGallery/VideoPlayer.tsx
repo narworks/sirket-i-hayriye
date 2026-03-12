@@ -1,10 +1,11 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useRef, useEffect, useCallback, useState } from "react";
+import ReactPlayer from "react-player";
 import { motion, AnimatePresence } from "framer-motion";
 import type { VideoContent } from "@/lib/types";
 
-interface VideoPlayerComponentProps {
+interface VideoPlayerProps {
   video: VideoContent;
   isPlaying: boolean;
   isMuted: boolean;
@@ -21,43 +22,64 @@ const videoVariants = {
   exit: { opacity: 0, transition: { duration: 0.4 } },
 };
 
-// YouTube video ID'sini URL'den çıkar
-function getYouTubeId(url: string): string | null {
-  const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|&v=)([^#&?]*).*/;
-  const match = url.match(regExp);
-  return match && match[2].length === 11 ? match[2] : null;
-}
-
 export function VideoPlayer({
   video,
+  isPlaying,
+  isMuted,
+  volume,
   onReady,
-}: VideoPlayerComponentProps) {
-  const [isLoaded, setIsLoaded] = useState(false);
-  const [iframeKey, setIframeKey] = useState(Date.now());
+  onProgress,
+  onEnded,
+  onNearEnd,
+}: VideoPlayerProps) {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const playerRef = useRef<any>(null);
+  const nearEndTriggeredRef = useRef(false);
+  const [duration, setDuration] = useState(0);
 
-  const videoId = getYouTubeId(video.url);
-
-  // Video değiştiğinde iframe'i yenile
+  // Video değişince near-end flag'ini sıfırla
   useEffect(() => {
-    setIsLoaded(false);
-    setIframeKey(Date.now());
+    nearEndTriggeredRef.current = false;
+    setDuration(0);
   }, [video.id]);
 
-  const handleLoad = () => {
-    setIsLoaded(true);
+  const handleDurationChange = useCallback((e: React.SyntheticEvent<HTMLVideoElement>) => {
+    const target = e.target as HTMLVideoElement;
+    if (target.duration && !isNaN(target.duration)) {
+      setDuration(target.duration);
+    }
+  }, []);
+
+  const handleTimeUpdate = useCallback(
+    (e: React.SyntheticEvent<HTMLVideoElement>) => {
+      const target = e.target as HTMLVideoElement;
+      const currentTime = target.currentTime || 0;
+      const videoDuration = target.duration || duration;
+
+      if (videoDuration > 0) {
+        const progress = (currentTime / videoDuration) * 100;
+        onProgress(progress, videoDuration);
+
+        // Video bitimine 3 saniye kala onNearEnd tetikle
+        if (!nearEndTriggeredRef.current) {
+          const remainingTime = videoDuration - currentTime;
+          if (remainingTime <= 3) {
+            nearEndTriggeredRef.current = true;
+            onNearEnd();
+          }
+        }
+      }
+    },
+    [onProgress, onNearEnd, duration]
+  );
+
+  const handleReady = useCallback(() => {
     onReady();
-  };
+  }, [onReady]);
 
-  if (!videoId) {
-    return (
-      <div className="flex h-full w-full items-center justify-center bg-black text-white">
-        Video yüklenemedi
-      </div>
-    );
-  }
-
-  // Basit YouTube embed - autoplay ve muted
-  const embedUrl = `https://www.youtube.com/embed/${videoId}?autoplay=1&mute=1&controls=0&showinfo=0&rel=0&modestbranding=1&playsinline=1&loop=0&fs=0&disablekb=1`;
+  const handleEnded = useCallback(() => {
+    onEnded();
+  }, [onEnded]);
 
   return (
     <AnimatePresence mode="wait">
@@ -69,32 +91,33 @@ export function VideoPlayer({
         exit="exit"
         className="absolute inset-0 bg-black"
       >
-        {/* Loading spinner */}
-        {!isLoaded && (
-          <div className="absolute inset-0 z-10 flex items-center justify-center bg-black">
-            <div className="h-12 w-12 animate-spin rounded-full border-4 border-ottoman-gold/30 border-t-ottoman-gold" />
-          </div>
-        )}
-
-        {/* YouTube iframe - tam ekran kaplama */}
+        {/* Video player wrapper - tam ekran kaplama */}
         <div className="absolute inset-0 overflow-hidden">
-          <iframe
-            key={iframeKey}
-            src={embedUrl}
+          <div
             className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2"
             style={{
-              border: "none",
-              pointerEvents: "none",
               minWidth: "100vw",
               minHeight: "100vh",
               width: "177.78vh", // 16:9 aspect ratio
               height: "56.25vw",
             }}
-            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-            allowFullScreen
-            onLoad={handleLoad}
-            title={video.title}
-          />
+          >
+            <ReactPlayer
+              ref={playerRef}
+              src={video.url}
+              playing={isPlaying}
+              muted={isMuted}
+              volume={volume}
+              width="100%"
+              height="100%"
+              onReady={handleReady}
+              onTimeUpdate={handleTimeUpdate}
+              onDurationChange={handleDurationChange}
+              onEnded={handleEnded}
+              controls={false}
+              playsInline
+            />
+          </div>
         </div>
       </motion.div>
     </AnimatePresence>
