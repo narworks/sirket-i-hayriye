@@ -1,9 +1,19 @@
 "use client";
 
 import { useRef, useEffect, useCallback, useState } from "react";
-import ReactPlayer from "react-player";
+import dynamic from "next/dynamic";
 import { motion, AnimatePresence } from "framer-motion";
 import type { VideoContent } from "@/lib/types";
+
+// Dynamic import to avoid SSR issues
+const ReactPlayer = dynamic(() => import("react-player"), {
+  ssr: false,
+  loading: () => (
+    <div className="flex h-full w-full items-center justify-center bg-black">
+      <div className="h-12 w-12 animate-spin rounded-full border-4 border-ottoman-gold/30 border-t-ottoman-gold" />
+    </div>
+  ),
+});
 
 interface VideoPlayerProps {
   video: VideoContent;
