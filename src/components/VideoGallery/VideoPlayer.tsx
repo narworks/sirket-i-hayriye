@@ -1,36 +1,8 @@
 "use client";
 
-import { useRef, useEffect, useState, ComponentType } from "react";
-import dynamic from "next/dynamic";
+import { useRef, useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import type { VideoContent } from "@/lib/types";
-
-// react-player props interface
-interface ReactPlayerProps {
-  url: string;
-  playing?: boolean;
-  muted?: boolean;
-  volume?: number;
-  width?: string | number;
-  height?: string | number;
-  onReady?: () => void;
-  onProgress?: (state: { played: number; playedSeconds: number }) => void;
-  onDuration?: (duration: number) => void;
-  onEnded?: () => void;
-  progressInterval?: number;
-  style?: React.CSSProperties;
-  config?: Record<string, unknown>;
-}
-
-// react-player SSR uyumluluğu için dynamic import
-const ReactPlayer = dynamic(() => import("react-player"), {
-  ssr: false,
-  loading: () => (
-    <div className="flex h-full w-full items-center justify-center bg-black">
-      <div className="h-12 w-12 animate-spin rounded-full border-4 border-ottoman-gold/30 border-t-ottoman-gold" />
-    </div>
-  ),
-}) as ComponentType<ReactPlayerProps>;
 
 interface VideoPlayerComponentProps {
   video: VideoContent;
@@ -49,42 +21,89 @@ const videoVariants = {
   exit: { opacity: 0, transition: { duration: 0.4 } },
 };
 
+// YouTube video ID'sini URL'den çıkar
+function getYouTubeId(url: string): string | null {
+  const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|&v=)([^#&?]*).*/;
+  const match = url.match(regExp);
+  return match && match[2].length === 11 ? match[2] : null;
+}
+
 export function VideoPlayer({
   video,
   isPlaying,
   isMuted,
-  volume,
   onReady,
   onProgress,
   onEnded,
   onNearEnd,
 }: VideoPlayerComponentProps) {
-  const [duration, setDuration] = useState(0);
-  const nearEndTriggeredRef = useRef(false);
+  const iframeRef = useRef<HTMLIFrameElement>(null);
+  const [isLoaded, setIsLoaded] = useState(false);
+  const progressIntervalRef = useRef<NodeJS.Timeout | null>(null);
+  const startTimeRef = useRef<number>(0);
 
-  // Video değişince near-end flag'ini sıfırla
+  const videoId = getYouTubeId(video.url);
+
+  // Video yüklendiğinde
+  const handleLoad = () => {
+    setIsLoaded(true);
+    onReady();
+    startTimeRef.current = Date.now();
+
+    // Progress simülasyonu (YouTube iframe API olmadan)
+    if (progressIntervalRef.current) {
+      clearInterval(progressIntervalRef.current);
+    }
+
+    progressIntervalRef.current = setInterval(() => {
+      const elapsed = (Date.now() - startTimeRef.current) / 1000;
+      const estimatedDuration = 180; // Tahmini 3 dakika
+      const progress = Math.min((elapsed / estimatedDuration) * 100, 100);
+      onProgress(progress, estimatedDuration);
+
+      // Son 5 saniyeye yaklaşınca
+      if (elapsed >= estimatedDuration - 5) {
+        onNearEnd();
+      }
+
+      // Video bittiğinde
+      if (elapsed >= estimatedDuration) {
+        if (progressIntervalRef.current) {
+          clearInterval(progressIntervalRef.current);
+        }
+        onEnded();
+      }
+    }, 1000);
+  };
+
+  // Cleanup
   useEffect(() => {
-    nearEndTriggeredRef.current = false;
+    return () => {
+      if (progressIntervalRef.current) {
+        clearInterval(progressIntervalRef.current);
+      }
+    };
+  }, []);
+
+  // Video değiştiğinde reset
+  useEffect(() => {
+    setIsLoaded(false);
+    startTimeRef.current = 0;
+    if (progressIntervalRef.current) {
+      clearInterval(progressIntervalRef.current);
+    }
   }, [video.id]);
 
-  const handleProgress = (state: { played: number; playedSeconds: number }) => {
-    const progressPercent = state.played * 100;
-    onProgress(progressPercent, duration);
+  if (!videoId) {
+    return (
+      <div className="flex h-full w-full items-center justify-center bg-black text-white">
+        Video yüklenemedi
+      </div>
+    );
+  }
 
-    // Son 2 saniyeye gelince
-    if (
-      duration > 0 &&
-      state.playedSeconds >= duration - 2 &&
-      !nearEndTriggeredRef.current
-    ) {
-      nearEndTriggeredRef.current = true;
-      onNearEnd();
-    }
-  };
-
-  const handleDuration = (dur: number) => {
-    setDuration(dur);
-  };
+  // YouTube embed URL
+  const embedUrl = `https://www.youtube.com/embed/${videoId}?autoplay=1&mute=${isMuted ? 1 : 0}&controls=0&showinfo=0&rel=0&modestbranding=1&playsinline=1&enablejsapi=1&loop=0`;
 
   return (
     <AnimatePresence mode="wait">
@@ -94,45 +113,26 @@ export function VideoPlayer({
         initial="enter"
         animate="center"
         exit="exit"
-        className="absolute inset-0 flex items-center justify-center"
+        className="absolute inset-0 flex items-center justify-center bg-black"
       >
-        <ReactPlayer
-          url={video.url}
-          playing={isPlaying}
-          muted={isMuted}
-          volume={volume}
-          width="100%"
-          height="100%"
-          onReady={onReady}
-          onProgress={handleProgress}
-          onDuration={handleDuration}
-          onEnded={onEnded}
-          progressInterval={500}
-          config={{
-            youtube: {
-              playerVars: {
-                autoplay: 1,
-                modestbranding: 1,
-                rel: 0,
-                showinfo: 0,
-                iv_load_policy: 3,
-                fs: 0,
-                playsinline: 1,
-              },
-            },
-            vimeo: {
-              playerOptions: {
-                autoplay: true,
-                byline: false,
-                portrait: false,
-                title: false,
-              },
-            },
-          }}
+        {/* Loading spinner */}
+        {!isLoaded && (
+          <div className="absolute inset-0 z-10 flex items-center justify-center bg-black">
+            <div className="h-12 w-12 animate-spin rounded-full border-4 border-ottoman-gold/30 border-t-ottoman-gold" />
+          </div>
+        )}
+
+        {/* YouTube iframe */}
+        <iframe
+          ref={iframeRef}
+          src={embedUrl}
+          className="absolute inset-0 h-full w-full"
+          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+          allowFullScreen
+          onLoad={handleLoad}
           style={{
-            position: "absolute",
-            top: 0,
-            left: 0,
+            border: "none",
+            pointerEvents: isPlaying ? "none" : "auto",
           }}
         />
       </motion.div>
