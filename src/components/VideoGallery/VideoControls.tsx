@@ -4,29 +4,15 @@ import { motion, AnimatePresence } from "framer-motion";
 import { useState, useEffect } from "react";
 
 interface VideoControlsProps {
-  isMuted: boolean;
-  isPlaying: boolean;
   showSkipButton: boolean;
-  hasMultipleVideos: boolean;
   onClose: () => void;
-  onToggleMute: () => void;
-  onTogglePlay: () => void;
   onSkip: () => void;
-  onNextVideo: () => void;
-  onPrevVideo: () => void;
 }
 
 export function VideoControls({
-  isMuted,
-  isPlaying,
   showSkipButton,
-  hasMultipleVideos,
   onClose,
-  onToggleMute,
-  onTogglePlay,
   onSkip,
-  onNextVideo,
-  onPrevVideo,
 }: VideoControlsProps) {
   const [showControls, setShowControls] = useState(true);
 
@@ -59,55 +45,11 @@ export function VideoControls({
           transition={{ duration: 0.3 }}
           className="pointer-events-none absolute inset-0 z-30"
         >
-          {/* Üst sağ - Kapat butonu */}
-          <div className="pointer-events-auto absolute top-6 right-6 flex items-center gap-4">
-            {/* Ses butonu */}
-            <button
-              onClick={onToggleMute}
-              className="flex h-12 w-12 items-center justify-center rounded-full bg-black/40 text-white backdrop-blur-sm transition-all hover:bg-black/60"
-              aria-label={isMuted ? "Sesi aç" : "Sesi kapat"}
-            >
-              {isMuted ? (
-                <svg
-                  className="h-6 w-6"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z"
-                  />
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M17 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2"
-                  />
-                </svg>
-              ) : (
-                <svg
-                  className="h-6 w-6"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 12.728M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z"
-                  />
-                </svg>
-              )}
-            </button>
-
-            {/* Kapat butonu */}
+          {/* Sağ üst - Kapat butonu */}
+          <div className="pointer-events-auto absolute top-6 right-6">
             <button
               onClick={onClose}
-              className="flex h-12 w-12 items-center justify-center rounded-full bg-black/40 text-white backdrop-blur-sm transition-all hover:bg-ottoman-red/80"
+              className="flex h-12 w-12 items-center justify-center rounded-full bg-black/50 text-white backdrop-blur-sm transition-all hover:bg-ottoman-red/80"
               aria-label="Galeriyi kapat"
             >
               <svg
@@ -126,23 +68,6 @@ export function VideoControls({
             </button>
           </div>
 
-          {/* Orta - Oynat/Durdur butonu */}
-          <button
-            onClick={onTogglePlay}
-            className="pointer-events-auto absolute top-1/2 left-1/2 flex h-20 w-20 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full bg-black/30 text-white backdrop-blur-sm transition-all hover:bg-black/50 hover:scale-110"
-            aria-label={isPlaying ? "Duraklat" : "Oynat"}
-          >
-            {isPlaying ? (
-              <svg className="h-10 w-10" fill="currentColor" viewBox="0 0 24 24">
-                <path d="M6 4h4v16H6V4zm8 0h4v16h-4V4z" />
-              </svg>
-            ) : (
-              <svg className="h-10 w-10 ml-1" fill="currentColor" viewBox="0 0 24 24">
-                <path d="M8 5v14l11-7z" />
-              </svg>
-            )}
-          </button>
-
           {/* Sağ alt - Atla butonu */}
           <AnimatePresence>
             {showSkipButton && (
@@ -151,7 +76,7 @@ export function VideoControls({
                 animate={{ opacity: 1, x: 0 }}
                 exit={{ opacity: 0, x: 20 }}
                 onClick={onSkip}
-                className="pointer-events-auto absolute right-6 bottom-24 flex items-center gap-2 rounded-full bg-black/40 px-6 py-3 text-white backdrop-blur-sm transition-all hover:bg-black/60"
+                className="pointer-events-auto absolute right-6 bottom-24 flex items-center gap-2 rounded-full bg-black/50 px-6 py-3 text-white backdrop-blur-sm transition-all hover:bg-black/70"
               >
                 <span className="font-['Source_Serif_4'] text-sm">Atla</span>
                 <svg
