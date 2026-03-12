@@ -87,3 +87,28 @@ export const ISKELE_ANADOLU = [
   "Beykoz",
   "Anadolukavağı",
 ];
+
+// Video Galeri Sabitleri
+import type { VideoContent, VideoGalleryConfig } from "./types";
+
+export const VIDEO_GALLERY_CONFIG: VideoGalleryConfig = {
+  autoPlay: true,
+  showOnEveryVisit: true, // Her ziyarette otomatik aç
+  defaultMuted: true, // Autoplay için muted başla
+  fadeOutDuration: 2, // Son 2 saniyede ses kısılır
+  crossfadeDuration: 0.6, // Video geçiş süresi
+  skipButtonDelay: 3, // 3 saniye sonra "Atla" butonu
+  storageKey: "sirket-galeri-muted", // Ses tercihi için
+};
+
+// Placeholder videolar - gerçek URL'ler eklenecek
+export const GALLERY_VIDEOS: VideoContent[] = [
+  {
+    id: "intro",
+    title: "Boğaz'ın Hikayesi",
+    description: "Şirket-i Hayriye'nin kuruluş hikayesi",
+    url: "https://www.youtube.com/watch?v=dQw4w9WgXcQ", // Placeholder
+    year: "1851",
+  },
+  // Daha fazla video buraya eklenecek
+];
