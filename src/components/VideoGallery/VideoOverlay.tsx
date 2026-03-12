@@ -70,34 +70,21 @@ export function VideoOverlay({ showLogo, children }: VideoOverlayProps) {
             initial="hidden"
             animate={logoState}
             exit="hidden"
-            className="pointer-events-none absolute inset-0 z-20 flex items-center justify-center"
+            className="pointer-events-none absolute top-6 left-6 z-20"
           >
-            <div className="text-center">
-              {/* Logo yazısı */}
-              <motion.h1
-                className="font-['Playfair_Display'] text-4xl font-bold text-white drop-shadow-2xl md:text-6xl lg:text-7xl"
+            {/* Logo container with dark background */}
+            <div className="rounded-lg bg-black/60 px-6 py-4 backdrop-blur-sm">
+              <h1
+                className="font-['Playfair_Display'] text-xl font-bold text-white md:text-2xl"
                 style={{
-                  textShadow: "0 0 40px rgba(201, 168, 76, 0.5)",
+                  textShadow: "0 0 20px rgba(201, 168, 76, 0.5)",
                 }}
               >
                 Şirket-i Hayriye
-              </motion.h1>
-              <motion.p
-                className="mt-4 font-['Cinzel'] text-xl tracking-[0.5em] text-ottoman-gold md:text-2xl"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ delay: 0.6, duration: 0.8 }}
-              >
-                • 1851 •
-              </motion.p>
-            </div>
-
-            {/* Dekoratif köşeler */}
-            <div className="absolute top-1/2 left-1/2 h-64 w-96 -translate-x-1/2 -translate-y-1/2 md:h-80 md:w-[500px]">
-              <div className="absolute -top-4 -left-4 h-8 w-8 border-t-2 border-l-2 border-ottoman-gold/50" />
-              <div className="absolute -top-4 -right-4 h-8 w-8 border-t-2 border-r-2 border-ottoman-gold/50" />
-              <div className="absolute -bottom-4 -left-4 h-8 w-8 border-b-2 border-l-2 border-ottoman-gold/50" />
-              <div className="absolute -bottom-4 -right-4 h-8 w-8 border-b-2 border-r-2 border-ottoman-gold/50" />
+              </h1>
+              <p className="mt-1 font-['Cinzel'] text-sm tracking-[0.3em] text-ottoman-gold">
+                1851
+              </p>
             </div>
           </motion.div>
         )}

@@ -108,10 +108,13 @@ export function VideoGallery() {
             isMuted={state.isMuted}
             isPlaying={state.isPlaying}
             showSkipButton={showSkipButton}
+            hasMultipleVideos={hasMultipleVideos}
             onClose={handleClose}
             onToggleMute={() => dispatch({ type: "TOGGLE_MUTE" })}
             onTogglePlay={() => dispatch({ type: "TOGGLE_PLAY" })}
             onSkip={handleSkip}
+            onNextVideo={() => dispatch({ type: "NEXT_VIDEO" })}
+            onPrevVideo={() => dispatch({ type: "PREV_VIDEO" })}
           />
 
           {/* İlerleme Göstergesi */}

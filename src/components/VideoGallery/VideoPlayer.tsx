@@ -102,8 +102,8 @@ export function VideoPlayer({
     );
   }
 
-  // YouTube embed URL
-  const embedUrl = `https://www.youtube.com/embed/${videoId}?autoplay=1&mute=${isMuted ? 1 : 0}&controls=0&showinfo=0&rel=0&modestbranding=1&playsinline=1&enablejsapi=1&loop=0`;
+  // YouTube embed URL - autoplay için mute=1 zorunlu (browser policy)
+  const embedUrl = `https://www.youtube.com/embed/${videoId}?autoplay=1&mute=1&controls=0&showinfo=0&rel=0&modestbranding=1&playsinline=1&enablejsapi=1&loop=0&origin=${typeof window !== 'undefined' ? window.location.origin : ''}`;
 
   return (
     <AnimatePresence mode="wait">
