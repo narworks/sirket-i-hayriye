@@ -103,26 +103,30 @@ export const VIDEO_GALLERY_CONFIG: VideoGalleryConfig = {
 
 // Atmosferik İstanbul Boğazı videoları
 // Not: Bu videolar örnek olarak eklenmiştir, kendi videolarınızla değiştirebilirsiniz
+// Video süreleri (saniye) - YouTube'dan kontrol edilip güncellenebilir
 export const GALLERY_VIDEOS: VideoContent[] = [
   {
     id: "sirket-hayriye",
     title: "Şirket-i Hayriye - 173 Yıl Dönümü",
     description: "Şirket-i Hayriye - 173 Yıl Dönümü",
-    url: "https://www.youtube.com/watch?v=zVWehY3K7DI", // Şirket-i Hayriye 173. Yıl Dönümü
+    url: "https://www.youtube.com/watch?v=zVWehY3K7DI",
+    duration: 150, // ~2.5 dakika
     year: "1851",
   },
   {
     id: "osmanli-hikayesi-ilk-anonim-sirket",
     title: "Şirket-i Hayriye'nin Hikayesi",
     description: "Osmanlı'nın İlk Anonim Şirketi",
-    url: "https://www.youtube.com/watch?v=NgvOS4nGMTY", // Osmanlı’nın İlk Anonim Şirketi: Şirket-i Hayriye’nin Hikayesi
+    url: "https://www.youtube.com/watch?v=NgvOS4nGMTY",
+    duration: 600, // ~10 dakika
     year: "1851",
   },
   {
     id: "bogaziçi-mimari",
     title: "Boğaziçi'nin Mimarı",
     description: "Boğaziçi'nin Mimarı",
-    url: "https://www.youtube.com/watch?v=H5Tto1TlmF0", // Boğaziçi'nin Mimarı
+    url: "https://www.youtube.com/watch?v=H5Tto1TlmF0",
+    duration: 420, // ~7 dakika
     year: "1854",
   },
 ];
