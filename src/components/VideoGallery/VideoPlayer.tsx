@@ -93,11 +93,16 @@ export function VideoPlayer({
   useEffect(() => {
     if (typeof window === "undefined") return;
 
+    const checkAndSetReady = () => {
+      if (window.YT && window.YT.Player) {
+        setApiReady(true);
+        return true;
+      }
+      return false;
+    };
+
     // API zaten yüklü mü kontrol et
-    if (window.YT && window.YT.Player) {
-      setApiReady(true);
-      return;
-    }
+    if (checkAndSetReady()) return;
 
     // API callback'i ayarla
     const originalCallback = window.onYouTubeIframeAPIReady;
@@ -112,21 +117,31 @@ export function VideoPlayer({
       script.src = "https://www.youtube.com/iframe_api";
       script.async = true;
       document.head.appendChild(script);
+    } else {
+      // Script var ama API henüz hazır değil - bekle
+      const interval = setInterval(() => {
+        if (checkAndSetReady()) {
+          clearInterval(interval);
+        }
+      }, 100);
+
+      return () => clearInterval(interval);
     }
   }, []);
 
   // Player'ı oluştur
   useEffect(() => {
-    if (!apiReady || !videoId || !containerRef.current) return;
+    if (!apiReady || !videoId) return;
 
-    // Container'a div ekle
-    const playerId = playerIdRef.current;
-    let playerDiv = document.getElementById(playerId);
-
-    if (!playerDiv) {
-      playerDiv = document.createElement("div");
-      playerDiv.id = playerId;
-      containerRef.current.appendChild(playerDiv);
+    // Container hazır olana kadar bekle
+    const container = containerRef.current;
+    if (!container) {
+      const timeout = setTimeout(() => {
+        // Re-trigger effect
+        setApiReady(false);
+        setTimeout(() => setApiReady(true), 10);
+      }, 100);
+      return () => clearTimeout(timeout);
     }
 
     // Önceki player'ı temizle
@@ -138,6 +153,21 @@ export function VideoPlayer({
       }
       playerRef.current = null;
     }
+
+    // Önceki player div'ini temizle
+    const oldPlayerDiv = document.getElementById(playerIdRef.current);
+    if (oldPlayerDiv) {
+      oldPlayerDiv.remove();
+    }
+
+    // Yeni player ID oluştur
+    playerIdRef.current = `yt-player-${Date.now()}`;
+    const playerId = playerIdRef.current;
+
+    // Container'a div ekle
+    const playerDiv = document.createElement("div");
+    playerDiv.id = playerId;
+    container.appendChild(playerDiv);
 
     nearEndTriggeredRef.current = false;
     setIsLoaded(false);
