@@ -126,6 +126,7 @@ export function VideoPlayer({
               onEnded={handleEnded}
               controls={false}
               playsInline
+              autoPlay
             />
           </div>
         </div>
