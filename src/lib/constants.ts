@@ -105,24 +105,24 @@ export const VIDEO_GALLERY_CONFIG: VideoGalleryConfig = {
 // Not: Bu videolar örnek olarak eklenmiştir, kendi videolarınızla değiştirebilirsiniz
 export const GALLERY_VIDEOS: VideoContent[] = [
   {
-    id: "bogaz-yolculugu",
-    title: "Boğaz'da Bir Yolculuk",
-    description: "İstanbul Boğazı'nın eşsiz manzarası",
-    url: "https://www.youtube.com/watch?v=z6O3GIVXa2w", // Istanbul Bosphorus 4K
+    id: "sirket-hayriye",
+    title: "Şirket-i Hayriye - 173 Yıl Dönümü",
+    description: "Şirket-i Hayriye - 173 Yıl Dönümü",
+    url: "https://www.youtube.com/watch?v=zVWehY3K7DI", // Şirket-i Hayriye 173. Yıl Dönümü
     year: "1851",
   },
   {
-    id: "istanbul-gundogumu",
-    title: "İstanbul'da Gün Doğumu",
-    description: "Boğaz'ın iki yakası arasında şafak",
-    url: "https://www.youtube.com/watch?v=Scxs7L0vhZ4", // Istanbul sunrise drone
-    year: "1854",
+    id: "osmanli-hikayesi-ilk-anonim-sirket",
+    title: "Şirket-i Hayriye'nin Hikayesi",
+    description: "Osmanlı'nın İlk Anonim Şirketi",
+    url: "https://www.youtube.com/watch?v=NgvOS4nGMTY", // Osmanlı’nın İlk Anonim Şirketi: Şirket-i Hayriye’nin Hikayesi
+    year: "1851",
   },
   {
-    id: "vapur-seferi",
-    title: "Tarihi Vapur Seferi",
-    description: "Şehir Hatları vapurlarıyla nostaljik yolculuk",
-    url: "https://www.youtube.com/watch?v=8HqyKw1BCUU", // Istanbul ferry
-    year: "1872",
+    id: "bogaziçi-mimari",
+    title: "Boğaziçi'nin Mimarı",
+    description: "Boğaziçi'nin Mimarı",
+    url: "https://www.youtube.com/watch?v=H5Tto1TlmF0", // Boğaziçi'nin Mimarı
+    year: "1854",
   },
 ];
