@@ -28,6 +28,46 @@ function getYouTubeId(url: string): string | null {
   return match && match[2].length === 11 ? match[2] : null;
 }
 
+// YouTube IFrame API için global tip
+declare global {
+  interface Window {
+    YT: {
+      Player: new (
+        elementId: string,
+        config: {
+          videoId: string;
+          playerVars?: Record<string, number | string>;
+          events?: {
+            onReady?: (event: { target: YTPlayer }) => void;
+            onStateChange?: (event: { data: number; target: YTPlayer }) => void;
+            onError?: (event: { data: number }) => void;
+          };
+        }
+      ) => YTPlayer;
+      PlayerState: {
+        ENDED: number;
+        PLAYING: number;
+        PAUSED: number;
+        BUFFERING: number;
+        CUED: number;
+      };
+    };
+    onYouTubeIframeAPIReady: () => void;
+  }
+}
+
+interface YTPlayer {
+  playVideo: () => void;
+  pauseVideo: () => void;
+  mute: () => void;
+  unMute: () => void;
+  setVolume: (volume: number) => void;
+  getCurrentTime: () => number;
+  getDuration: () => number;
+  getPlayerState: () => number;
+  destroy: () => void;
+}
+
 export function VideoPlayer({
   video,
   isPlaying,
@@ -37,79 +77,173 @@ export function VideoPlayer({
   onEnded,
   onNearEnd,
 }: VideoPlayerComponentProps) {
-  const iframeRef = useRef<HTMLIFrameElement>(null);
-  const [isLoaded, setIsLoaded] = useState(false);
+  const containerRef = useRef<HTMLDivElement>(null);
+  const playerRef = useRef<YTPlayer | null>(null);
   const progressIntervalRef = useRef<NodeJS.Timeout | null>(null);
-  const startTimeRef = useRef<number>(0);
   const nearEndTriggeredRef = useRef(false);
+  const [isLoaded, setIsLoaded] = useState(false);
+  const [apiReady, setApiReady] = useState(false);
+  const playerIdRef = useRef(`yt-player-${Date.now()}`);
 
   const videoId = getYouTubeId(video.url);
 
-  // YouTube iframe'e komut gönder
-  const sendCommand = useCallback((command: string, args?: unknown) => {
-    if (iframeRef.current?.contentWindow) {
-      const message = JSON.stringify({
-        event: "command",
-        func: command,
-        args: args ? [args] : [],
-      });
-      iframeRef.current.contentWindow.postMessage(message, "*");
+  // YouTube API'yi yükle
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+
+    // API zaten yüklü mü kontrol et
+    if (window.YT && window.YT.Player) {
+      setApiReady(true);
+      return;
+    }
+
+    // API callback'i ayarla
+    const originalCallback = window.onYouTubeIframeAPIReady;
+    window.onYouTubeIframeAPIReady = () => {
+      originalCallback?.();
+      setApiReady(true);
+    };
+
+    // Script zaten ekli mi kontrol et
+    if (!document.querySelector('script[src*="youtube.com/iframe_api"]')) {
+      const script = document.createElement("script");
+      script.src = "https://www.youtube.com/iframe_api";
+      script.async = true;
+      document.head.appendChild(script);
     }
   }, []);
 
-  // Mute/unmute kontrolü
+  // Player'ı oluştur
   useEffect(() => {
-    if (!isLoaded) return;
-    if (isMuted) {
-      sendCommand("mute");
-    } else {
-      sendCommand("unMute");
-    }
-  }, [isMuted, isLoaded, sendCommand]);
+    if (!apiReady || !videoId || !containerRef.current) return;
 
-  // Play/pause kontrolü
-  useEffect(() => {
-    if (!isLoaded) return;
-    if (isPlaying) {
-      sendCommand("playVideo");
-    } else {
-      sendCommand("pauseVideo");
-    }
-  }, [isPlaying, isLoaded, sendCommand]);
+    // Container'a div ekle
+    const playerId = playerIdRef.current;
+    let playerDiv = document.getElementById(playerId);
 
-  // Video yüklendiğinde
-  const handleLoad = () => {
-    setIsLoaded(true);
-    onReady();
-    startTimeRef.current = Date.now();
+    if (!playerDiv) {
+      playerDiv = document.createElement("div");
+      playerDiv.id = playerId;
+      containerRef.current.appendChild(playerDiv);
+    }
+
+    // Önceki player'ı temizle
+    if (playerRef.current) {
+      try {
+        playerRef.current.destroy();
+      } catch {
+        // Ignore destroy errors
+      }
+      playerRef.current = null;
+    }
+
     nearEndTriggeredRef.current = false;
+    setIsLoaded(false);
 
-    // Progress simülasyonu
-    if (progressIntervalRef.current) {
-      clearInterval(progressIntervalRef.current);
+    // Yeni player oluştur
+    playerRef.current = new window.YT.Player(playerId, {
+      videoId: videoId,
+      playerVars: {
+        autoplay: 1,
+        mute: 1, // Autoplay için zorunlu
+        controls: 0,
+        showinfo: 0,
+        rel: 0,
+        modestbranding: 1,
+        playsinline: 1,
+        enablejsapi: 1,
+        origin: window.location.origin,
+      },
+      events: {
+        onReady: (event) => {
+          setIsLoaded(true);
+          onReady();
+
+          // Mute durumunu uygula
+          if (isMuted) {
+            event.target.mute();
+          } else {
+            event.target.unMute();
+          }
+
+          // Progress tracking başlat
+          if (progressIntervalRef.current) {
+            clearInterval(progressIntervalRef.current);
+          }
+
+          progressIntervalRef.current = setInterval(() => {
+            if (!playerRef.current) return;
+
+            try {
+              const currentTime = playerRef.current.getCurrentTime();
+              const duration = playerRef.current.getDuration();
+
+              if (duration > 0) {
+                const progress = (currentTime / duration) * 100;
+                onProgress(progress, duration);
+
+                // Son 5 saniyeye yaklaşınca
+                if (currentTime >= duration - 5 && !nearEndTriggeredRef.current) {
+                  nearEndTriggeredRef.current = true;
+                  onNearEnd();
+                }
+              }
+            } catch {
+              // Player henüz hazır değil
+            }
+          }, 1000);
+        },
+        onStateChange: (event) => {
+          // Video bitti
+          if (event.data === window.YT.PlayerState.ENDED) {
+            if (progressIntervalRef.current) {
+              clearInterval(progressIntervalRef.current);
+            }
+            onEnded();
+          }
+        },
+        onError: (event) => {
+          console.error("YouTube Player Error:", event.data);
+        },
+      },
+    });
+
+    return () => {
+      if (progressIntervalRef.current) {
+        clearInterval(progressIntervalRef.current);
+      }
+    };
+  }, [apiReady, videoId, onReady, onProgress, onEnded, onNearEnd, isMuted]);
+
+  // Mute kontrolü
+  useEffect(() => {
+    if (!playerRef.current || !isLoaded) return;
+
+    try {
+      if (isMuted) {
+        playerRef.current.mute();
+      } else {
+        playerRef.current.unMute();
+      }
+    } catch {
+      // Player henüz hazır değil
     }
+  }, [isMuted, isLoaded]);
 
-    progressIntervalRef.current = setInterval(() => {
-      const elapsed = (Date.now() - startTimeRef.current) / 1000;
-      const estimatedDuration = 180; // Tahmini 3 dakika
-      const progress = Math.min((elapsed / estimatedDuration) * 100, 100);
-      onProgress(progress, estimatedDuration);
+  // Play/Pause kontrolü
+  useEffect(() => {
+    if (!playerRef.current || !isLoaded) return;
 
-      // Son 5 saniyeye yaklaşınca
-      if (elapsed >= estimatedDuration - 5 && !nearEndTriggeredRef.current) {
-        nearEndTriggeredRef.current = true;
-        onNearEnd();
+    try {
+      if (isPlaying) {
+        playerRef.current.playVideo();
+      } else {
+        playerRef.current.pauseVideo();
       }
-
-      // Video bittiğinde
-      if (elapsed >= estimatedDuration) {
-        if (progressIntervalRef.current) {
-          clearInterval(progressIntervalRef.current);
-        }
-        onEnded();
-      }
-    }, 1000);
-  };
+    } catch {
+      // Player henüz hazır değil
+    }
+  }, [isPlaying, isLoaded]);
 
   // Cleanup
   useEffect(() => {
@@ -117,18 +251,15 @@ export function VideoPlayer({
       if (progressIntervalRef.current) {
         clearInterval(progressIntervalRef.current);
       }
+      if (playerRef.current) {
+        try {
+          playerRef.current.destroy();
+        } catch {
+          // Ignore
+        }
+      }
     };
   }, []);
-
-  // Video değiştiğinde reset
-  useEffect(() => {
-    setIsLoaded(false);
-    startTimeRef.current = 0;
-    nearEndTriggeredRef.current = false;
-    if (progressIntervalRef.current) {
-      clearInterval(progressIntervalRef.current);
-    }
-  }, [video.id]);
 
   if (!videoId) {
     return (
@@ -137,9 +268,6 @@ export function VideoPlayer({
       </div>
     );
   }
-
-  // YouTube embed URL - autoplay için mute=1 zorunlu, sonra API ile açılır
-  const embedUrl = `https://www.youtube.com/embed/${videoId}?autoplay=1&mute=1&controls=0&showinfo=0&rel=0&modestbranding=1&playsinline=1&enablejsapi=1&loop=0&origin=${typeof window !== "undefined" ? window.location.origin : ""}`;
 
   return (
     <AnimatePresence mode="wait">
@@ -158,18 +286,11 @@ export function VideoPlayer({
           </div>
         )}
 
-        {/* YouTube iframe */}
-        <iframe
-          ref={iframeRef}
-          src={embedUrl}
+        {/* YouTube Player Container */}
+        <div
+          ref={containerRef}
           className="absolute inset-0 h-full w-full"
-          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-          allowFullScreen
-          onLoad={handleLoad}
-          style={{
-            border: "none",
-            pointerEvents: "none",
-          }}
+          style={{ pointerEvents: "none" }}
         />
       </motion.div>
     </AnimatePresence>
