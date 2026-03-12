@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { AnimatePresence } from "framer-motion";
 import { useVideoGallery } from "@/hooks/useVideoGallery";
+import { WelcomeScreen } from "./WelcomeScreen";
 import { VideoOverlay } from "./VideoOverlay";
 import { VideoPlayer } from "./VideoPlayer";
 import { VideoControls } from "./VideoControls";
@@ -28,19 +29,23 @@ export function VideoGallery() {
 
   // Skip butonu için zamanlayıcı
   useEffect(() => {
-    if (!state.isOpen || !state.isPlaying) return;
+    if (!state.isOpen || !state.isPlaying || !state.hasStarted) return;
 
     const timeout = setTimeout(() => {
       setShowSkipButton(true);
     }, config.skipButtonDelay * 1000);
 
     return () => clearTimeout(timeout);
-  }, [state.isOpen, state.isPlaying, state.currentIndex, config.skipButtonDelay]);
+  }, [state.isOpen, state.isPlaying, state.hasStarted, state.currentIndex, config.skipButtonDelay]);
 
   // Video değişince skip butonunu sıfırla
   useEffect(() => {
     setShowSkipButton(false);
   }, [state.currentIndex]);
+
+  const handleStart = useCallback(() => {
+    dispatch({ type: "START_WITH_SOUND" });
+  }, [dispatch]);
 
   const handleClose = useCallback(() => {
     dispatch({ type: "CLOSE" });
@@ -97,39 +102,49 @@ export function VideoGallery() {
   if (!isMounted) return null;
 
   return (
-    <AnimatePresence>
-      {state.isOpen && currentVideo && (
-        <VideoOverlay showLogo={state.showLogo}>
-          {/* Video Player - key ile video değişince yeniden mount */}
-          <VideoPlayer
-            key={currentVideo.id}
-            video={currentVideo}
-            isPlaying={state.isPlaying}
-            isMuted={state.isMuted}
-            volume={state.volume}
-            onReady={handleReady}
-            onProgress={handleProgress}
-            onEnded={handleVideoEnd}
-            onNearEnd={handleNearEnd}
-          />
+    <AnimatePresence mode="wait">
+      {state.isOpen && (
+        <>
+          {/* Hoşgeldiniz Ekranı - kullanıcı henüz başlatmadıysa */}
+          {!state.hasStarted && (
+            <WelcomeScreen onStart={handleStart} />
+          )}
 
-          {/* Kontroller */}
-          <VideoControls
-            showSkipButton={showSkipButton}
-            isMuted={state.isMuted}
-            onClose={handleClose}
-            onSkip={handleSkip}
-            onToggleMute={handleToggleMute}
-          />
+          {/* Video Galeri - kullanıcı başlattıysa */}
+          {state.hasStarted && currentVideo && (
+            <VideoOverlay showLogo={state.showLogo}>
+              {/* Video Player - key ile video değişince yeniden mount */}
+              <VideoPlayer
+                key={currentVideo.id}
+                video={currentVideo}
+                isPlaying={state.isPlaying}
+                isMuted={state.isMuted}
+                volume={state.volume}
+                onReady={handleReady}
+                onProgress={handleProgress}
+                onEnded={handleVideoEnd}
+                onNearEnd={handleNearEnd}
+              />
 
-          {/* İlerleme Göstergesi */}
-          <VideoProgress
-            currentIndex={state.currentIndex}
-            totalVideos={totalVideos}
-            progress={state.progress}
-            onGoTo={handleGoToVideo}
-          />
-        </VideoOverlay>
+              {/* Kontroller */}
+              <VideoControls
+                showSkipButton={showSkipButton}
+                isMuted={state.isMuted}
+                onClose={handleClose}
+                onSkip={handleSkip}
+                onToggleMute={handleToggleMute}
+              />
+
+              {/* İlerleme Göstergesi */}
+              <VideoProgress
+                currentIndex={state.currentIndex}
+                totalVideos={totalVideos}
+                progress={state.progress}
+                onGoTo={handleGoToVideo}
+              />
+            </VideoOverlay>
+          )}
+        </>
       )}
     </AnimatePresence>
   );

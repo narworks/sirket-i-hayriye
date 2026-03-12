@@ -6,9 +6,10 @@ import { VIDEO_GALLERY_CONFIG, GALLERY_VIDEOS } from "@/lib/constants";
 
 const initialState: VideoGalleryState = {
   isOpen: true, // Her zaman açık başla
+  hasStarted: false, // Kullanıcı henüz başlatmadı
   currentIndex: 0,
-  isPlaying: true,
-  isMuted: VIDEO_GALLERY_CONFIG.defaultMuted,
+  isPlaying: false, // Kullanıcı başlatana kadar bekle
+  isMuted: true, // Başlangıçta sessiz (welcome ekranı gösterilecek)
   volume: 0.8,
   showLogo: true,
   isReady: false,
@@ -23,7 +24,9 @@ function videoGalleryReducer(
     case "OPEN":
       return { ...state, isOpen: true, isPlaying: true };
     case "CLOSE":
-      return { ...state, isOpen: false, isPlaying: false };
+      return { ...state, isOpen: false, isPlaying: false, hasStarted: false };
+    case "START_WITH_SOUND":
+      return { ...state, hasStarted: true, isPlaying: true, isMuted: false };
     case "NEXT_VIDEO":
       const nextIndex = (state.currentIndex + 1) % GALLERY_VIDEOS.length;
       return {

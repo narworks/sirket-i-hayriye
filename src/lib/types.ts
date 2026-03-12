@@ -22,6 +22,7 @@ export interface VideoGalleryConfig {
 
 export interface VideoGalleryState {
   isOpen: boolean;
+  hasStarted: boolean; // Kullanıcı deneyimi başlattı mı?
   currentIndex: number;
   isPlaying: boolean;
   isMuted: boolean;
@@ -34,6 +35,7 @@ export interface VideoGalleryState {
 export type VideoGalleryAction =
   | { type: "OPEN" }
   | { type: "CLOSE" }
+  | { type: "START_WITH_SOUND" } // Kullanıcı tıkladı, sesli başla
   | { type: "NEXT_VIDEO" }
   | { type: "PREV_VIDEO" }
   | { type: "GO_TO_VIDEO"; index: number }
