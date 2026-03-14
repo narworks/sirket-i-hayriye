@@ -105,12 +105,28 @@ export const VIDEO_GALLERY_CONFIG: VideoGalleryConfig = {
 // Not: Bu videolar örnek olarak eklenmiştir, kendi videolarınızla değiştirebilirsiniz
 // Video süreleri (saniye) - YouTube'dan kontrol edilip güncellenebilir
 export const GALLERY_VIDEOS: VideoContent[] = [
+  // Yerel videolar
+  {
+    id: "borsa-istanbul",
+    title: "Borsa İstanbul",
+    description: "Borsa İstanbul Tanıtım",
+    url: "/videos/borsa-istanbul.mp4",
+    year: "1851",
+  },
+  {
+    id: "hanim-turk",
+    title: "Hanım Türk",
+    description: "Hanım Türk",
+    url: "/videos/hanim-turk.mp4",
+    year: "1851",
+  },
+  // YouTube videoları
   {
     id: "sirket-hayriye-intro",
     title: "Şirket-i Hayriye",
     description: "Şirket-i Hayriye Tanıtım",
     url: "https://www.youtube.com/watch?v=uDpTTzjqaK4",
-    duration: 180, // Video süresini güncelleyin
+    duration: 180,
     year: "1851",
   },
   {
@@ -118,7 +134,7 @@ export const GALLERY_VIDEOS: VideoContent[] = [
     title: "Şirket-i Hayriye'nin Hikayesi",
     description: "Osmanlı'nın İlk Anonim Şirketi",
     url: "https://www.youtube.com/watch?v=NgvOS4nGMTY",
-    duration: 600, // ~10 dakika
+    duration: 600,
     year: "1851",
   },
   {
@@ -126,7 +142,7 @@ export const GALLERY_VIDEOS: VideoContent[] = [
     title: "Boğaziçi'nin Mimarı",
     description: "Boğaziçi'nin Mimarı",
     url: "https://www.youtube.com/watch?v=H5Tto1TlmF0",
-    duration: 420, // ~7 dakika
+    duration: 420,
     year: "1854",
   },
 ];
