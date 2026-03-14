@@ -106,11 +106,11 @@ export const VIDEO_GALLERY_CONFIG: VideoGalleryConfig = {
 // Video süreleri (saniye) - YouTube'dan kontrol edilip güncellenebilir
 export const GALLERY_VIDEOS: VideoContent[] = [
   {
-    id: "sirket-hayriye",
-    title: "Şirket-i Hayriye - 173 Yıl Dönümü",
-    description: "Şirket-i Hayriye - 173 Yıl Dönümü",
-    url: "https://www.youtube.com/watch?v=zVWehY3K7DI",
-    duration: 150, // ~2.5 dakika
+    id: "sirket-hayriye-intro",
+    title: "Şirket-i Hayriye",
+    description: "Şirket-i Hayriye Tanıtım",
+    url: "https://www.youtube.com/watch?v=uDpTTzjqaK4",
+    duration: 180, // Video süresini güncelleyin
     year: "1851",
   },
   {
