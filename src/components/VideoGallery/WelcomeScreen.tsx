@@ -66,7 +66,7 @@ export function WelcomeScreen({ onStart }: WelcomeScreenProps) {
             >
               <path d="M8 5v14l11-7z" />
             </svg>
-            Deneyimi Başlat
+            Başlat
           </span>
         </motion.button>
 
