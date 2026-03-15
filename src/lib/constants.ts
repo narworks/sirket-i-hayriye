@@ -114,13 +114,6 @@ export const GALLERY_VIDEOS: VideoContent[] = [
     year: "1851",
   },
   {
-    id: "tuz-kaynalari-delice",
-    title: "Tuz Kaynaları Delice",
-    description: "Tuz Kaynaları Delice",
-    url: "/videos/tuz_kaynaklari_delice.mp4",
-    year: "1851",
-  },
-  {
     id: "hanim-turk",
     title: "Hanım Türk",
     description: "Hanım Türk",
@@ -151,5 +144,12 @@ export const GALLERY_VIDEOS: VideoContent[] = [
     url: "https://www.youtube.com/watch?v=H5Tto1TlmF0",
     duration: 420,
     year: "1854",
+  },
+  {
+    id: "tuz-kaynalari-delice",
+    title: "Tuz Kaynaları Delice",
+    description: "Tuz Kaynaları Delice",
+    url: "/videos/tuz_kaynaklari_delice.mp4",
+    year: "1851",
   },
 ];
