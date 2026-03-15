@@ -107,17 +107,17 @@ export const VIDEO_GALLERY_CONFIG: VideoGalleryConfig = {
 export const GALLERY_VIDEOS: VideoContent[] = [
   // Yerel videolar
   {
-    id: "borsa-istanbul",
-    title: "Borsa İstanbul",
-    description: "Borsa İstanbul Tanıtım",
-    url: "/videos/borsa-istanbul.mp4",
-    year: "1851",
-  },
-  {
     id: "hanim-turk",
     title: "Hanım Türk",
     description: "Hanım Türk",
     url: "/videos/hanim-turk.mp4",
+    year: "1851",
+  },
+  {
+    id: "borsa-istanbul",
+    title: "Borsa İstanbul",
+    description: "Borsa İstanbul Tanıtım",
+    url: "/videos/borsa-istanbul.mp4",
     year: "1851",
   },
   // YouTube videoları

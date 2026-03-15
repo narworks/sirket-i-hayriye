@@ -15,12 +15,22 @@ export function WelcomeScreen({ onStart }: WelcomeScreenProps) {
       exit={{ opacity: 0 }}
       className="fixed inset-0 z-[100] flex items-center justify-center overflow-hidden bg-[#d4c4a8]"
     >
-      {/* Arka plan görseli */}
+      {/* Yatay cihazlar için görsel (landscape) */}
       <Image
         src="/images/welcome-screen.jpg"
         alt="Şirket-i Hayriye - 1851"
         fill
-        className="object-contain"
+        className="hidden object-contain landscape:block"
+        priority
+        sizes="100vw"
+      />
+
+      {/* Dikey cihazlar için görsel (portrait) */}
+      <Image
+        src="/images/welcome-screen-vertical.png"
+        alt="Şirket-i Hayriye - 1851"
+        fill
+        className="block object-contain landscape:hidden"
         priority
         sizes="100vw"
       />
