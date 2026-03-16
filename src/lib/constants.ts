@@ -152,4 +152,12 @@ export const GALLERY_VIDEOS: VideoContent[] = [
     url: "/videos/tuz_kaynaklari_delice.mp4",
     year: "1851",
   },
+  {
+    id: "sirket-hayriye-belgesel",
+    title: "Şirket-i Hayriye Belgesel",
+    description: "Şirket-i Hayriye Belgesel",
+    url: "https://www.youtube.com/watch?v=03jJJ_9vkuY",
+    duration: 300,
+    year: "1851",
+  },
 ];
