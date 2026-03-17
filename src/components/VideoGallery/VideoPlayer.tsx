@@ -133,13 +133,22 @@ export function VideoPlayer({
   const handleLocalCanPlay = useCallback(() => {
     setIsLoaded(true);
     onReady();
-    // Otomatik oynat
-    if (videoRef.current) {
-      videoRef.current.play().catch(() => {
-        // Autoplay failed - user interaction required
-      });
-    }
   }, [onReady]);
+
+  // Video yüklendiğinde otomatik oynat
+  useEffect(() => {
+    if (isLocal && videoRef.current) {
+      // Videoyu sessiz yap ve oynat
+      videoRef.current.muted = true;
+      const playPromise = videoRef.current.play();
+      if (playPromise !== undefined) {
+        playPromise.catch(() => {
+          // Autoplay engellendi - video hazır olunca tekrar dene
+          console.log("Autoplay blocked, will retry on user interaction");
+        });
+      }
+    }
+  }, [isLocal, video.id]);
 
   const handleYouTubeLoad = useCallback(() => {
     setIsLoaded(true);
@@ -194,7 +203,7 @@ export function VideoPlayer({
               }}
               autoPlay
               playsInline
-              muted={initialMutedRef.current}
+              muted
               onCanPlay={handleLocalCanPlay}
               onTimeUpdate={handleLocalTimeUpdate}
               onEnded={handleLocalEnded}
