@@ -56,19 +56,19 @@ export function Portrait() {
             transition={{ duration: 0.8, delay: 0.3 }}
             className="md:col-span-3"
           >
-            <span className="font-['Cinzel'] text-sm tracking-[0.3em] text-ottoman-gold">
+            <span className="font-['Cinzel'] text-base tracking-[0.2em] text-ottoman-gold md:text-sm md:tracking-[0.3em]">
               VİZYONER LİDER
             </span>
             <h2 className="mt-2 font-['Playfair_Display'] text-3xl font-bold text-ottoman-navy md:text-4xl">
               Hüseyin Haki Efendi
             </h2>
-            <p className="mt-1 font-['Cinzel'] text-base text-ottoman-navy/50">
+            <p className="mt-1 font-['Cinzel'] text-lg text-ottoman-navy/50 md:text-base">
               Şirket-i Hayriye Müdürü — 1867 – 1894
             </p>
 
             <OttomanDivider className="my-6 max-w-xs" />
 
-            <div className="space-y-4 font-['Source_Serif_4'] text-base leading-relaxed text-ottoman-navy/70">
+            <div className="space-y-4 font-['Source_Serif_4'] text-lg leading-relaxed text-ottoman-navy/70 md:text-base">
               <p>
                 Hüseyin Haki Efendi, 1867 yılında Osmanlı&apos;nın ilk anonim kuruluşu
                 Şirket-i Hayriye&apos;ye yönetici olarak atandığında, Boğaz&apos;ın iki

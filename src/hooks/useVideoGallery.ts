@@ -6,10 +6,10 @@ import { VIDEO_GALLERY_CONFIG, GALLERY_VIDEOS } from "@/lib/constants";
 
 const initialState: VideoGalleryState = {
   isOpen: true, // Her zaman açık başla
-  hasStarted: false, // Kullanıcı henüz başlatmadı
+  hasStarted: false, // Kullanıcı henüz sesi açmadı
   currentIndex: 0,
-  isPlaying: false, // Kullanıcı başlatana kadar bekle
-  isMuted: true, // Başlangıçta sessiz (welcome ekranı gösterilecek)
+  isPlaying: true, // Video hemen başlasın (sessiz)
+  isMuted: true, // Başlangıçta sessiz
   volume: 0.8,
   showLogo: true,
   isReady: false,

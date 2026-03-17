@@ -18,7 +18,7 @@ function StatCounter({ value, label, suffix = "" }: { value: number; label: stri
         {isInView ? value : 0}
         {suffix}
       </motion.span>
-      <p className="mt-1 font-['Source_Serif_4'] text-sm text-ottoman-navy/60">{label}</p>
+      <p className="mt-1 font-['Source_Serif_4'] text-base text-ottoman-navy/60 md:text-sm">{label}</p>
     </div>
   );
 }
@@ -55,7 +55,7 @@ export function Suhulet() {
           <motion.span
             initial={{ opacity: 0 }}
             animate={isInView ? { opacity: 1 } : {}}
-            className="font-['Cinzel'] text-sm tracking-[0.3em] text-ottoman-gold/70"
+            className="font-['Cinzel'] text-base tracking-[0.2em] text-ottoman-gold/70 md:text-sm md:tracking-[0.3em]"
           >
             DÜNYA DENİZCİLİK TARİHİNDE BİR İLK
           </motion.span>

@@ -68,7 +68,7 @@ export function Hero() {
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ duration: 1, delay: 1 }}
-          className="mt-6 max-w-xl font-['Source_Serif_4'] text-base leading-relaxed text-ottoman-navy/70 sm:text-lg md:text-xl"
+          className="mt-6 max-w-xl font-['Source_Serif_4'] text-lg leading-relaxed text-ottoman-navy/70 sm:text-xl md:text-2xl"
         >
           {SITE_CONFIG.tagline}
         </motion.p>
@@ -95,7 +95,7 @@ export function Hero() {
             transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
             className="flex flex-col items-center gap-2"
           >
-            <span className="font-['Source_Serif_4'] text-xs tracking-widest text-ottoman-navy/40 uppercase">
+            <span className="font-['Source_Serif_4'] text-sm tracking-widest text-ottoman-navy/40 uppercase md:text-xs">
               Keşfet
             </span>
             <svg
