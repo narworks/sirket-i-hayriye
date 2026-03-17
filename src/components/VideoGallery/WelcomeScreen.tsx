@@ -44,11 +44,6 @@ export function WelcomeScreen({ onStart }: WelcomeScreenProps) {
         <span className="text-2xl font-bold tracking-wide md:text-4xl">
           SESİ AÇ
         </span>
-
-        {/* Alt yazı */}
-        <span className="text-sm text-white/70 md:text-base">
-          Deneyimi başlatmak için tıklayın
-        </span>
       </motion.button>
     </motion.div>
   );
