@@ -67,6 +67,7 @@ export const VideoPlayer = forwardRef<VideoPlayerHandle, VideoPlayerProps>(
     ref
   ) {
     const [isLoaded, setIsLoaded] = useState(false);
+    const [showPlayOverlay, setShowPlayOverlay] = useState(true); // Mobilde tıklanabilir overlay
     const videoRef = useRef<HTMLVideoElement>(null);
     const iframeRef = useRef<HTMLIFrameElement>(null);
     const progressIntervalRef = useRef<NodeJS.Timeout | null>(null);
@@ -110,6 +111,7 @@ export const VideoPlayer = forwardRef<VideoPlayerHandle, VideoPlayerProps>(
     // Video değiştiğinde state'leri sıfırla
     useEffect(() => {
       setIsLoaded(false);
+      setShowPlayOverlay(true); // Yeni video için overlay göster
       startTimeRef.current = 0;
       nearEndTriggeredRef.current = false;
       youtubeReadyRef.current = false;
@@ -243,7 +245,11 @@ export const VideoPlayer = forwardRef<VideoPlayerHandle, VideoPlayerProps>(
 
       // YouTube API'sinin hazır olması için birkaç deneme yap
       const applyAudioState = (attempt: number = 1) => {
-        if (attempt > 5) return; // Max 5 deneme
+        if (attempt > 5) {
+          // 5 denemeden sonra hala başlamadıysa overlay'i göster
+          setShowPlayOverlay(true);
+          return;
+        }
 
         setTimeout(() => {
           if (iframeRef.current?.contentWindow) {
@@ -259,6 +265,9 @@ export const VideoPlayer = forwardRef<VideoPlayerHandle, VideoPlayerProps>(
             if (!shouldBeMuted) {
               sendYouTubeCommand(iframeRef.current, "setVolume", [Math.round(volume * 100)]);
             }
+
+            // Başarılı olduğunda overlay'i gizle (kısa gecikme ile)
+            setTimeout(() => setShowPlayOverlay(false), 500);
           } else {
             // iframe henüz hazır değil, tekrar dene
             applyAudioState(attempt + 1);
@@ -269,6 +278,23 @@ export const VideoPlayer = forwardRef<VideoPlayerHandle, VideoPlayerProps>(
       applyAudioState();
       onReady();
     }, [onReady, hasStarted, isMuted, volume]);
+
+    // Overlay'e tıklandığında videoyu başlat (mobil için)
+    const handlePlayOverlayClick = useCallback(() => {
+      if (!isLocal && iframeRef.current) {
+        sendYouTubeCommand(iframeRef.current, "playVideo");
+
+        // Ses durumunu ayarla
+        const shouldBeMuted = !hasStarted || isMuted;
+        sendYouTubeCommand(iframeRef.current, shouldBeMuted ? "mute" : "unMute");
+
+        if (!shouldBeMuted) {
+          sendYouTubeCommand(iframeRef.current, "setVolume", [Math.round(volume * 100)]);
+        }
+
+        setShowPlayOverlay(false);
+      }
+    }, [isLocal, hasStarted, isMuted, volume]);
 
     // YouTube için geçersiz video kontrolü
     if (!isLocal && !videoId) {
@@ -318,24 +344,44 @@ export const VideoPlayer = forwardRef<VideoPlayerHandle, VideoPlayerProps>(
                 onEnded={handleLocalEnded}
               />
             ) : (
-              // YouTube iframe
-              <iframe
-                ref={iframeRef}
-                key={video.id}
-                src={embedUrl}
-                className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2"
-                style={{
-                  border: "none",
-                  pointerEvents: "none",
-                  // Ekranı tamamen kapla - hem portrait hem landscape
-                  width: "max(100vw, 177.78vh)",
-                  height: "max(100vh, 56.25vw)",
-                }}
-                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                allowFullScreen
-                onLoad={handleYouTubeLoad}
-                title={video.title}
-              />
+              // YouTube iframe + tıklanabilir overlay
+              <>
+                <iframe
+                  ref={iframeRef}
+                  key={video.id}
+                  src={embedUrl}
+                  className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2"
+                  style={{
+                    border: "none",
+                    pointerEvents: "none",
+                    // Ekranı tamamen kapla - hem portrait hem landscape
+                    width: "max(100vw, 177.78vh)",
+                    height: "max(100vh, 56.25vw)",
+                  }}
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                  allowFullScreen
+                  onLoad={handleYouTubeLoad}
+                  title={video.title}
+                />
+                {/* Mobilde autoplay başarısız olursa tıklanabilir overlay */}
+                {showPlayOverlay && isLoaded && (
+                  <button
+                    onClick={handlePlayOverlayClick}
+                    className="absolute inset-0 z-20 flex cursor-pointer items-center justify-center bg-black/30 transition-opacity hover:bg-black/40"
+                    aria-label="Videoyu oynat"
+                  >
+                    <div className="flex h-20 w-20 items-center justify-center rounded-full bg-white/90 shadow-lg transition-transform hover:scale-110">
+                      <svg
+                        className="ml-1 h-10 w-10 text-ottoman-navy"
+                        fill="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path d="M8 5v14l11-7z" />
+                      </svg>
+                    </div>
+                  </button>
+                )}
+              </>
             )}
           </div>
         </motion.div>
