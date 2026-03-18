@@ -100,13 +100,13 @@ export const VideoPlayer = forwardRef<VideoPlayerHandle, VideoPlayerProps>(
       };
     }, [video.id]);
 
-    // Yerel video için mute/volume kontrolü
+    // Yerel video için mute/volume kontrolü - video yüklendikten sonra çalışsın
     useEffect(() => {
-      if (isLocal && videoRef.current) {
+      if (isLocal && videoRef.current && isLoaded) {
         videoRef.current.muted = isMuted;
         videoRef.current.volume = volume;
       }
-    }, [isLocal, isMuted, volume]);
+    }, [isLocal, isMuted, volume, isLoaded]);
 
     // YouTube için timer-based progress (iframe'den event alınamıyor)
     useEffect(() => {
