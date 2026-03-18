@@ -18,7 +18,7 @@ function StatCounter({ value, label, suffix = "" }: { value: number; label: stri
         {isInView ? value : 0}
         {suffix}
       </motion.span>
-      <p className="mt-1 font-['Source_Serif_4'] text-base text-ottoman-navy/60 md:text-sm">{label}</p>
+      <p className="mt-1 font-['Source_Serif_4'] text-lg text-ottoman-navy/60 md:text-sm">{label}</p>
     </div>
   );
 }
@@ -55,7 +55,7 @@ export function Suhulet() {
           <motion.span
             initial={{ opacity: 0 }}
             animate={isInView ? { opacity: 1 } : {}}
-            className="font-['Cinzel'] text-base tracking-[0.2em] text-ottoman-gold/70 md:text-sm md:tracking-[0.3em]"
+            className="font-['Cinzel'] text-lg tracking-[0.2em] text-ottoman-gold/70 md:text-sm md:tracking-[0.3em]"
           >
             DÜNYA DENİZCİLİK TARİHİNDE BİR İLK
           </motion.span>
@@ -228,19 +228,19 @@ export function Suhulet() {
             animate={isInView ? { opacity: 1, x: 0 } : {}}
             transition={{ duration: 0.8, delay: 0.5 }}
           >
-            <p className="font-['Source_Serif_4'] text-base leading-relaxed text-ottoman-parchment/80 md:text-lg">
+            <p className="font-['Source_Serif_4'] text-lg leading-relaxed text-ottoman-parchment/80 md:text-lg">
               Şirket-i Hayriye Müdürü{" "}
               <strong className="text-ottoman-gold">Hüseyin Haki Efendi</strong>,
               Boğaz&apos;da araç taşımacılığı için dünyanın ilk arabalı vapurunu
               tasarladı.
             </p>
-            <p className="mt-4 font-['Source_Serif_4'] text-base leading-relaxed text-ottoman-parchment/70">
+            <p className="mt-4 font-['Source_Serif_4'] text-lg leading-relaxed text-ottoman-parchment/70">
               İki tarafında kıyıya indirilecek kapakları olan bu vapur, at arabaları ve
               askeri ağırlıkları rahatça taşıyabilecek genişlikteydi. 1872&apos;de
               Üsküdar-Kabataş hattında hizmete giren Suhulet, modern arabalı
               feribotların atası oldu.
             </p>
-            <p className="mt-4 font-['Source_Serif_4'] text-base leading-relaxed text-ottoman-parchment/70">
+            <p className="mt-4 font-['Source_Serif_4'] text-lg leading-relaxed text-ottoman-parchment/70">
               Çanakkale Savaşı&apos;nda ise cepheye top taşıyarak stratejik bir rol
               üstlendi — bir ulaşım aracının savaş gemisine dönüştüğü eşsiz bir
               tarihî an.

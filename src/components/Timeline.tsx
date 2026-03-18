@@ -89,13 +89,13 @@ function TimelineItem({
           transition={{ duration: 0.6, delay: 0.2 }}
           className="flex-1 pb-8"
         >
-          <span className="font-['Cinzel'] text-base tracking-widest text-ottoman-gold">
+          <span className="font-['Cinzel'] text-lg tracking-widest text-ottoman-gold">
             {event.year}
           </span>
-          <h3 className="mt-1 font-['Playfair_Display'] text-xl font-semibold text-ottoman-navy">
+          <h3 className="mt-1 font-['Playfair_Display'] text-2xl font-semibold text-ottoman-navy">
             {event.title}
           </h3>
-          <p className="mt-2 font-['Source_Serif_4'] text-base leading-relaxed text-ottoman-navy/60">
+          <p className="mt-2 font-['Source_Serif_4'] text-lg leading-relaxed text-ottoman-navy/60">
             {event.description}
           </p>
         </motion.div>
@@ -114,7 +114,7 @@ export function Timeline() {
             initial={{ opacity: 0 }}
             whileInView={{ opacity: 1 }}
             viewport={{ once: true }}
-            className="font-['Cinzel'] text-base tracking-[0.2em] text-ottoman-gold md:text-sm md:tracking-[0.3em]"
+            className="font-['Cinzel'] text-lg tracking-[0.2em] text-ottoman-gold md:text-sm md:tracking-[0.3em]"
           >
             TARİHÇE
           </motion.span>

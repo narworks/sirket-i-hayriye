@@ -68,7 +68,7 @@ export function Hero() {
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ duration: 1, delay: 1 }}
-          className="mt-6 max-w-xl font-['Source_Serif_4'] text-lg leading-relaxed text-ottoman-navy/70 sm:text-xl md:text-2xl"
+          className="mt-6 max-w-xl font-['Source_Serif_4'] text-xl leading-relaxed text-ottoman-navy/70 sm:text-2xl md:text-2xl"
         >
           {SITE_CONFIG.tagline}
         </motion.p>

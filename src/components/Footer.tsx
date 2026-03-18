@@ -22,23 +22,23 @@ export function Footer() {
           transition={{ duration: 0.8 }}
           className="mb-12"
         >
-          <h3 className="mb-6 text-center font-['Cinzel'] text-base tracking-[0.2em] text-ottoman-gold/60 md:text-sm md:tracking-[0.3em]">
+          <h3 className="mb-6 text-center font-['Cinzel'] text-lg tracking-[0.2em] text-ottoman-gold/60 md:text-sm md:tracking-[0.3em]">
             İSKELE AĞI
           </h3>
           <div className="grid gap-8 md:grid-cols-2">
             <div>
-              <h4 className="mb-3 font-['Cinzel'] text-sm tracking-widest text-ottoman-parchment/40 md:text-xs">
+              <h4 className="mb-3 font-['Cinzel'] text-base tracking-widest text-ottoman-parchment/40 md:text-xs">
                 AVRUPA YAKASI
               </h4>
-              <p className="font-['Source_Serif_4'] text-base leading-loose text-ottoman-parchment/50 md:text-sm">
+              <p className="font-['Source_Serif_4'] text-lg leading-loose text-ottoman-parchment/50 md:text-sm">
                 {ISKELE_AVRUPA.join(" · ")}
               </p>
             </div>
             <div>
-              <h4 className="mb-3 font-['Cinzel'] text-sm tracking-widest text-ottoman-parchment/40 md:text-xs">
+              <h4 className="mb-3 font-['Cinzel'] text-base tracking-widest text-ottoman-parchment/40 md:text-xs">
                 ANADOLU YAKASI
               </h4>
-              <p className="font-['Source_Serif_4'] text-base leading-loose text-ottoman-parchment/50 md:text-sm">
+              <p className="font-['Source_Serif_4'] text-lg leading-loose text-ottoman-parchment/50 md:text-sm">
                 {ISKELE_ANADOLU.join(" · ")}
               </p>
             </div>
@@ -59,7 +59,7 @@ export function Footer() {
             </span>
           </div>
 
-          <p className="font-['Source_Serif_4'] text-sm text-ottoman-parchment/30 md:text-xs">
+          <p className="font-['Source_Serif_4'] text-base text-ottoman-parchment/30 md:text-xs">
             Osmanlı Denizcilik Tarihine Saygıyla
           </p>
         </div>
