@@ -221,8 +221,17 @@ export const VideoPlayer = forwardRef<VideoPlayerHandle, VideoPlayerProps>(
 
     const handleYouTubeLoad = useCallback(() => {
       setIsLoaded(true);
+      // Yüklendikten sonra mevcut mute durumunu uygula
+      // (URL'de sadece hasStarted'a göre başlıyor, isMuted'ı burada uyguluyoruz)
+      if (iframeRef.current?.contentWindow) {
+        const func = isMuted ? "mute" : "unMute";
+        iframeRef.current.contentWindow.postMessage(
+          JSON.stringify({ event: "command", func, args: [] }),
+          "https://www.youtube.com"
+        );
+      }
       onReady();
-    }, [onReady]);
+    }, [onReady, isMuted]);
 
     // YouTube için geçersiz video kontrolü
     if (!isLocal && !videoId) {
@@ -233,8 +242,9 @@ export const VideoPlayer = forwardRef<VideoPlayerHandle, VideoPlayerProps>(
       );
     }
 
-    // YouTube için: hasStarted true VE isMuted false ise sesli, aksi halde sessiz başla
-    const muteParam = (hasStarted && !isMuted) ? 0 : 1;
+    // YouTube için: hasStarted true ise sesli başla (mute durumu onLoad'da postMessage ile uygulanacak)
+    // isMuted'ı URL'e dahil etmiyoruz çünkü değişince iframe yeniden yükleniyor
+    const muteParam = hasStarted ? 0 : 1;
     const embedUrl = videoId
       ? `https://www.youtube.com/embed/${videoId}?autoplay=1&mute=${muteParam}&controls=0&showinfo=0&rel=0&modestbranding=1&playsinline=1&loop=0&fs=0&disablekb=1&enablejsapi=1&origin=${typeof window !== "undefined" ? window.location.origin : ""}`
       : "";
