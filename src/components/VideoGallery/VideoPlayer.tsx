@@ -69,6 +69,7 @@ export const VideoPlayer = forwardRef<VideoPlayerHandle, VideoPlayerProps>(
     const [isLoaded, setIsLoaded] = useState(false);
     const [showPlayOverlay, setShowPlayOverlay] = useState(true); // Mobilde tıklanabilir overlay
     const [iframeKey, setIframeKey] = useState(() => Date.now()); // Her video için benzersiz key
+    const [isPortrait, setIsPortrait] = useState(false); // Dikey mod kontrolü
     const videoRef = useRef<HTMLVideoElement>(null);
     const iframeRef = useRef<HTMLIFrameElement>(null);
     const progressIntervalRef = useRef<NodeJS.Timeout | null>(null);
@@ -109,6 +110,22 @@ export const VideoPlayer = forwardRef<VideoPlayerHandle, VideoPlayerProps>(
         }
       },
     }));
+
+    // Orientation algılama
+    useEffect(() => {
+      const checkOrientation = () => {
+        setIsPortrait(window.innerHeight > window.innerWidth);
+      };
+
+      checkOrientation();
+      window.addEventListener("resize", checkOrientation);
+      window.addEventListener("orientationchange", checkOrientation);
+
+      return () => {
+        window.removeEventListener("resize", checkOrientation);
+        window.removeEventListener("orientationchange", checkOrientation);
+      };
+    }, []);
 
     // Video değiştiğinde state'leri sıfırla
     useEffect(() => {
@@ -374,9 +391,10 @@ export const VideoPlayer = forwardRef<VideoPlayerHandle, VideoPlayerProps>(
                   style={{
                     border: "none",
                     pointerEvents: "none",
-                    // Ekranı tamamen kapla - hem portrait hem landscape
-                    width: "max(100vw, 177.78vh)",
-                    height: "max(100vh, 56.25vw)",
+                    // Portrait: videoyu ekrana sığdır (letterbox)
+                    // Landscape: ekranı tamamen kapla
+                    width: isPortrait ? "100vw" : "max(100vw, 177.78vh)",
+                    height: isPortrait ? "56.25vw" : "max(100vh, 56.25vw)",
                   }}
                   allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                   allowFullScreen

@@ -21,6 +21,7 @@ export function VideoGallery() {
 
   const [showSkipButton, setShowSkipButton] = useState(false);
   const [isMounted, setIsMounted] = useState(false);
+  const [videoChangeCount, setVideoChangeCount] = useState(0); // Her video değişiminde artır
   const videoPlayerRef = useRef<VideoPlayerHandle>(null);
 
   // Hydration fix
@@ -39,9 +40,10 @@ export function VideoGallery() {
     return () => clearTimeout(timeout);
   }, [state.isOpen, state.isPlaying, state.hasStarted, state.currentIndex, config.skipButtonDelay]);
 
-  // Video değişince skip butonunu sıfırla
+  // Video değişince skip butonunu sıfırla ve sayacı artır
   useEffect(() => {
     setShowSkipButton(false);
+    setVideoChangeCount((c) => c + 1);
   }, [state.currentIndex]);
 
   // Kullanıcı "Sesi Aç" tıkladığında - DOĞRUDAN user gesture içinde play() çağır
@@ -116,7 +118,7 @@ export function VideoGallery() {
           {/* Video Player - key ile video değişince yeniden mount */}
           <VideoPlayer
             ref={videoPlayerRef}
-            key={currentVideo.id}
+            key={`${currentVideo.id}-${videoChangeCount}`}
             video={currentVideo}
             isPlaying={state.isPlaying}
             isMuted={state.isMuted}
