@@ -1,11 +1,11 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { AnimatePresence } from "framer-motion";
 import { useVideoGallery } from "@/hooks/useVideoGallery";
 import { WelcomeScreen } from "./WelcomeScreen";
 import { VideoOverlay } from "./VideoOverlay";
-import { VideoPlayer } from "./VideoPlayer";
+import { VideoPlayer, VideoPlayerHandle } from "./VideoPlayer";
 import { VideoControls } from "./VideoControls";
 import { VideoProgress } from "./VideoProgress";
 
@@ -21,6 +21,7 @@ export function VideoGallery() {
 
   const [showSkipButton, setShowSkipButton] = useState(false);
   const [isMounted, setIsMounted] = useState(false);
+  const videoPlayerRef = useRef<VideoPlayerHandle>(null);
 
   // Hydration fix
   useEffect(() => {
@@ -43,7 +44,13 @@ export function VideoGallery() {
     setShowSkipButton(false);
   }, [state.currentIndex]);
 
+  // Kullanıcı "Sesi Aç" tıkladığında - DOĞRUDAN user gesture içinde play() çağır
   const handleStart = useCallback(() => {
+    // Önce video player'a play komutu gönder (user gesture context)
+    if (videoPlayerRef.current) {
+      videoPlayerRef.current.play();
+    }
+    // Sonra state'i güncelle
     dispatch({ type: "START_WITH_SOUND" });
   }, [dispatch]);
 
@@ -88,8 +95,12 @@ export function VideoGallery() {
   }, [dispatch]);
 
   const handleToggleMute = useCallback(() => {
+    // Toggle mute via ref for immediate effect
+    if (videoPlayerRef.current) {
+      videoPlayerRef.current.setMuted(!state.isMuted);
+    }
     dispatch({ type: "TOGGLE_MUTE" });
-  }, [dispatch]);
+  }, [dispatch, state.isMuted]);
 
   const handleGoToVideo = useCallback(
     (index: number) => {
@@ -107,6 +118,7 @@ export function VideoGallery() {
         <VideoOverlay showLogo={state.showLogo}>
           {/* Video Player - key ile video değişince yeniden mount */}
           <VideoPlayer
+            ref={videoPlayerRef}
             key={currentVideo.id}
             video={currentVideo}
             isPlaying={state.isPlaying}
