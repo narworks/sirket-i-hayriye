@@ -127,12 +127,9 @@ export const VideoPlayer = forwardRef<VideoPlayerHandle, VideoPlayerProps>(
       };
     }, []);
 
-    // Video değiştiğinde state'leri sıfırla
+    // Video ID değiştiğinde state'leri sıfırla (hasStarted değişiminde sıfırlama!)
     useEffect(() => {
       setIsLoaded(false);
-      // Kullanıcı zaten başlatmışsa (hasStarted=true), overlay gösterme
-      // Böylece video değişiminde otomatik başlar
-      setShowPlayOverlay(!hasStarted);
       setIframeKey(Date.now()); // Yeni iframe key - cache bypass
       startTimeRef.current = 0;
       nearEndTriggeredRef.current = false;
@@ -146,7 +143,12 @@ export const VideoPlayer = forwardRef<VideoPlayerHandle, VideoPlayerProps>(
           clearTimeout(playRetryRef.current);
         }
       };
-    }, [video.id, hasStarted]);
+    }, [video.id]); // SADECE video.id değiştiğinde - hasStarted DEĞİL!
+
+    // hasStarted değiştiğinde overlay'i güncelle (isLoaded'ı etkilemeden)
+    useEffect(() => {
+      setShowPlayOverlay(!hasStarted);
+    }, [hasStarted]);
 
     // Mute/volume kontrolü - sadece isLoaded olduktan sonra
     // Bu effect mute butonu değiştiğinde çalışır
@@ -271,6 +273,36 @@ export const VideoPlayer = forwardRef<VideoPlayerHandle, VideoPlayerProps>(
           });
       }
       // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [isLocal, video.id]);
+
+    // FAILSAFE: Video oynatılıyorsa kesinlikle isLoaded true olmalı
+    // Bu, race condition'ları yakalamak için
+    useEffect(() => {
+      if (!isLocal || !videoRef.current) return;
+
+      const checkVideoPlaying = () => {
+        const video = videoRef.current;
+        // Video oynatılıyorsa (paused değil ve currentTime > 0) kesinlikle loaded
+        if (video && !video.paused && video.currentTime > 0) {
+          setIsLoaded(true);
+        }
+      };
+
+      // Her 100ms'de kontrol et
+      const interval = setInterval(checkVideoPlaying, 100);
+
+      // 2 saniye sonra timeout - video oynatılıyorsa zorla loaded yap
+      const timeout = setTimeout(() => {
+        const video = videoRef.current;
+        if (video && !video.paused) {
+          setIsLoaded(true);
+        }
+      }, 2000);
+
+      return () => {
+        clearInterval(interval);
+        clearTimeout(timeout);
+      };
     }, [isLocal, video.id]);
 
     // YouTube'dan gelen mesajları dinle (onReady, onStateChange vb.)
