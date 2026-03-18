@@ -138,8 +138,8 @@ export function VideoPlayer({
   // Video yüklendiğinde otomatik oynat
   useEffect(() => {
     if (isLocal && videoRef.current) {
-      // Videoyu sessiz yap ve oynat
-      videoRef.current.muted = true;
+      // Videoyu mevcut mute durumuna göre ayarla ve oynat
+      videoRef.current.muted = isMuted;
       const playPromise = videoRef.current.play();
       if (playPromise !== undefined) {
         playPromise.catch(() => {
@@ -203,7 +203,7 @@ export function VideoPlayer({
               }}
               autoPlay
               playsInline
-              muted
+              muted={isMuted}
               onCanPlay={handleLocalCanPlay}
               onTimeUpdate={handleLocalTimeUpdate}
               onEnded={handleLocalEnded}
