@@ -15,7 +15,7 @@ interface VideoPlayerProps {
   video: VideoContent;
   isPlaying: boolean;
   isMuted: boolean;
-  hasStarted: boolean; // Kullanıcı sesi açtı mı?
+  hasStarted: boolean; // Kullanıcı WelcomeScreen'e tıkladı mı?
   volume: number;
   onReady: () => void;
   onProgress: (progress: number, duration: number) => void;
@@ -47,6 +47,20 @@ function isLocalVideo(url: string): boolean {
   return url.startsWith("/") || url.startsWith("./") || !url.includes("youtube");
 }
 
+// YouTube'a postMessage gönder
+function sendYouTubeCommand(
+  iframe: HTMLIFrameElement | null,
+  func: string,
+  args: unknown[] = []
+) {
+  if (iframe?.contentWindow) {
+    iframe.contentWindow.postMessage(
+      JSON.stringify({ event: "command", func, args }),
+      "https://www.youtube.com"
+    );
+  }
+}
+
 export const VideoPlayer = forwardRef<VideoPlayerHandle, VideoPlayerProps>(
   function VideoPlayer(
     { video, isMuted, hasStarted, volume, onReady, onProgress, onEnded, onNearEnd },
@@ -58,6 +72,7 @@ export const VideoPlayer = forwardRef<VideoPlayerHandle, VideoPlayerProps>(
     const progressIntervalRef = useRef<NodeJS.Timeout | null>(null);
     const startTimeRef = useRef<number>(0);
     const nearEndTriggeredRef = useRef(false);
+    const youtubeReadyRef = useRef(false);
 
     const isLocal = isLocalVideo(video.url);
     const videoId = !isLocal ? getYouTubeId(video.url) : null;
@@ -67,37 +82,37 @@ export const VideoPlayer = forwardRef<VideoPlayerHandle, VideoPlayerProps>(
     useImperativeHandle(ref, () => ({
       play: async () => {
         if (isLocal && videoRef.current) {
-          videoRef.current.muted = false;
           try {
             await videoRef.current.play();
           } catch (e) {
             console.log("Play failed:", e);
           }
+        } else if (!isLocal) {
+          sendYouTubeCommand(iframeRef.current, "playVideo");
         }
       },
       pause: () => {
         if (isLocal && videoRef.current) {
           videoRef.current.pause();
+        } else if (!isLocal) {
+          sendYouTubeCommand(iframeRef.current, "pauseVideo");
         }
       },
       setMuted: (muted: boolean) => {
         if (isLocal && videoRef.current) {
           videoRef.current.muted = muted;
-        } else if (!isLocal && iframeRef.current?.contentWindow) {
-          const func = muted ? "mute" : "unMute";
-          iframeRef.current.contentWindow.postMessage(
-            JSON.stringify({ event: "command", func, args: [] }),
-            "https://www.youtube.com"
-          );
+        } else if (!isLocal) {
+          sendYouTubeCommand(iframeRef.current, muted ? "mute" : "unMute");
         }
       },
     }));
 
-    // Video değiştiğinde state'leri sıfırla (sadece video.id değişince)
+    // Video değiştiğinde state'leri sıfırla
     useEffect(() => {
       setIsLoaded(false);
       startTimeRef.current = 0;
       nearEndTriggeredRef.current = false;
+      youtubeReadyRef.current = false;
 
       return () => {
         if (progressIntervalRef.current) {
@@ -106,30 +121,28 @@ export const VideoPlayer = forwardRef<VideoPlayerHandle, VideoPlayerProps>(
       };
     }, [video.id]);
 
-    // Mute/volume kontrolü - yerel video ve YouTube için
+    // Mute/volume kontrolü - sadece isLoaded olduktan sonra
+    // Bu effect mute butonu değiştiğinde çalışır
     useEffect(() => {
-      if (isLocal && videoRef.current) {
-        videoRef.current.muted = isMuted;
-        videoRef.current.volume = volume;
-      } else if (!isLocal && iframeRef.current?.contentWindow) {
-        // YouTube iframe'e postMessage ile mute/unmute komutu gönder
-        const func = isMuted ? "mute" : "unMute";
-        iframeRef.current.contentWindow.postMessage(
-          JSON.stringify({ event: "command", func, args: [] }),
-          "https://www.youtube.com"
-        );
-        iframeRef.current.contentWindow.postMessage(
-          JSON.stringify({
-            event: "command",
-            func: "setVolume",
-            args: [Math.round(volume * 100)],
-          }),
-          "https://www.youtube.com"
-        );
-      }
-    }, [isLocal, isMuted, volume]);
+      if (!isLoaded) return;
 
-    // YouTube için timer-based progress (iframe'den event alınamıyor)
+      if (isLocal && videoRef.current) {
+        // hasStarted true ise isMuted'a göre ses ayarla
+        // hasStarted false ise her zaman sessiz
+        const shouldBeMuted = !hasStarted || isMuted;
+        videoRef.current.muted = shouldBeMuted;
+        videoRef.current.volume = volume;
+      } else if (!isLocal && youtubeReadyRef.current) {
+        // YouTube için postMessage
+        const shouldBeMuted = !hasStarted || isMuted;
+        sendYouTubeCommand(iframeRef.current, shouldBeMuted ? "mute" : "unMute");
+        if (!shouldBeMuted) {
+          sendYouTubeCommand(iframeRef.current, "setVolume", [Math.round(volume * 100)]);
+        }
+      }
+    }, [isLocal, isLoaded, isMuted, hasStarted, volume]);
+
+    // YouTube için timer-based progress
     useEffect(() => {
       if (isLocal || !isLoaded) return;
 
@@ -185,30 +198,35 @@ export const VideoPlayer = forwardRef<VideoPlayerHandle, VideoPlayerProps>(
 
     const handleLocalCanPlay = useCallback(() => {
       setIsLoaded(true);
-      // Video hazır olduğunda doğru muted state'ini ayarla
+
       if (videoRef.current) {
-        videoRef.current.muted = isMuted;
+        // hasStarted true ve isMuted false ise ses açık
+        // Aksi halde sessiz
+        const shouldBeMuted = !hasStarted || isMuted;
+        videoRef.current.muted = shouldBeMuted;
         videoRef.current.volume = volume;
       }
-      onReady();
-    }, [onReady, isMuted, volume]);
 
-    // Video yüklendiğinde otomatik oynat (sadece video değişince)
-    // Tarayıcı autoplay politikası gereği önce sessiz başlatıp, sonra gerçek ses durumunu uygula
+      onReady();
+    }, [onReady, hasStarted, isMuted, volume]);
+
+    // Yerel video otomatik oynatma
     useEffect(() => {
       if (!isLocal || !videoRef.current) return;
 
-      const video = videoRef.current;
-      // Autoplay için önce sessiz başlat
-      video.muted = true;
+      const videoElement = videoRef.current;
 
-      const playPromise = video.play();
+      // Mobil autoplay için önce sessiz başlat
+      videoElement.muted = true;
+
+      const playPromise = videoElement.play();
       if (playPromise !== undefined) {
         playPromise
           .then(() => {
             // Oynatma başladıktan sonra gerçek ses durumunu uygula
             if (videoRef.current) {
-              videoRef.current.muted = isMuted;
+              const shouldBeMuted = !hasStarted || isMuted;
+              videoRef.current.muted = shouldBeMuted;
               videoRef.current.volume = volume;
             }
           })
@@ -219,30 +237,36 @@ export const VideoPlayer = forwardRef<VideoPlayerHandle, VideoPlayerProps>(
       // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [isLocal, video.id]);
 
+    // YouTube iframe yüklendiğinde
     const handleYouTubeLoad = useCallback(() => {
       setIsLoaded(true);
-      // YouTube API'sinin hazır olması için kısa bir gecikme
-      // Mobilde iframe yüklense bile API hemen hazır olmayabiliyor
-      setTimeout(() => {
-        if (iframeRef.current?.contentWindow) {
-          const shouldUnmute = hasStarted && !isMuted;
-          const func = shouldUnmute ? "unMute" : "mute";
-          iframeRef.current.contentWindow.postMessage(
-            JSON.stringify({ event: "command", func, args: [] }),
-            "https://www.youtube.com"
-          );
-          if (shouldUnmute) {
-            iframeRef.current.contentWindow.postMessage(
-              JSON.stringify({
-                event: "command",
-                func: "setVolume",
-                args: [Math.round(volume * 100)],
-              }),
-              "https://www.youtube.com"
-            );
+
+      // YouTube API'sinin hazır olması için birkaç deneme yap
+      const applyAudioState = (attempt: number = 1) => {
+        if (attempt > 5) return; // Max 5 deneme
+
+        setTimeout(() => {
+          if (iframeRef.current?.contentWindow) {
+            youtubeReadyRef.current = true;
+
+            // Videoyu oynat
+            sendYouTubeCommand(iframeRef.current, "playVideo");
+
+            // Ses durumunu ayarla
+            const shouldBeMuted = !hasStarted || isMuted;
+            sendYouTubeCommand(iframeRef.current, shouldBeMuted ? "mute" : "unMute");
+
+            if (!shouldBeMuted) {
+              sendYouTubeCommand(iframeRef.current, "setVolume", [Math.round(volume * 100)]);
+            }
+          } else {
+            // iframe henüz hazır değil, tekrar dene
+            applyAudioState(attempt + 1);
           }
-        }
-      }, 500);
+        }, attempt * 300); // Her denemede biraz daha bekle
+      };
+
+      applyAudioState();
       onReady();
     }, [onReady, hasStarted, isMuted, volume]);
 
@@ -255,8 +279,8 @@ export const VideoPlayer = forwardRef<VideoPlayerHandle, VideoPlayerProps>(
       );
     }
 
-    // YouTube için: Mobil autoplay politikası nedeniyle HER ZAMAN mute=1 ile başla
-    // Ses durumu onLoad'da postMessage ile uygulanacak
+    // YouTube embed URL - HER ZAMAN mute=1 ile başla (mobil autoplay için zorunlu)
+    // Ses durumu postMessage ile ayarlanacak
     const embedUrl = videoId
       ? `https://www.youtube.com/embed/${videoId}?autoplay=1&mute=1&controls=0&showinfo=0&rel=0&modestbranding=1&playsinline=1&loop=0&fs=0&disablekb=1&enablejsapi=1&origin=${typeof window !== "undefined" ? window.location.origin : ""}`
       : "";
@@ -278,41 +302,40 @@ export const VideoPlayer = forwardRef<VideoPlayerHandle, VideoPlayerProps>(
             </div>
           )}
 
-          {/* Video container - tam ekran kaplama (portrait ve landscape uyumlu) */}
-          <div className="absolute inset-0 flex items-center justify-center overflow-hidden">
+          {/* Video container */}
+          <div className="absolute inset-0 overflow-hidden">
             {isLocal ? (
               // Yerel video dosyası
               <video
                 ref={videoRef}
                 key={video.id}
                 src={video.url}
-                className="h-full w-full object-cover"
+                className="absolute inset-0 h-full w-full object-cover"
                 playsInline
+                webkit-playsinline="true"
                 onCanPlay={handleLocalCanPlay}
                 onTimeUpdate={handleLocalTimeUpdate}
                 onEnded={handleLocalEnded}
               />
             ) : (
-              // YouTube iframe - aspect ratio koruyarak ekranı kapla
-              <div className="relative h-full w-full">
-                <iframe
-                  ref={iframeRef}
-                  key={video.id}
-                  src={embedUrl}
-                  className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2"
-                  style={{
-                    border: "none",
-                    pointerEvents: "none",
-                    // Portrait modda yüksekliği, landscape modda genişliği baz al
-                    width: "max(100vw, 177.78vh)",
-                    height: "max(100vh, 56.25vw)",
-                  }}
-                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                  allowFullScreen
-                  onLoad={handleYouTubeLoad}
-                  title={video.title}
-                />
-              </div>
+              // YouTube iframe
+              <iframe
+                ref={iframeRef}
+                key={video.id}
+                src={embedUrl}
+                className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2"
+                style={{
+                  border: "none",
+                  pointerEvents: "none",
+                  // Ekranı tamamen kapla - hem portrait hem landscape
+                  width: "max(100vw, 177.78vh)",
+                  height: "max(100vh, 56.25vw)",
+                }}
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                allowFullScreen
+                onLoad={handleYouTubeLoad}
+                title={video.title}
+              />
             )}
           </div>
         </motion.div>
