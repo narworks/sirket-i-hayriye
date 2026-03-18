@@ -31,7 +31,7 @@ export function Suhulet() {
     <section
       id="suhulet"
       ref={ref}
-      className="relative overflow-hidden bg-ottoman-navy px-6 py-20 md:py-32"
+      className="sea-effect sea-depth relative overflow-hidden px-6 py-20 md:py-32"
     >
       {/* Background pattern */}
       <div className="pointer-events-none absolute inset-0 opacity-5">

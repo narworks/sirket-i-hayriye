@@ -177,3 +177,131 @@ html {
   background: rgba(201, 168, 76, 0.3);
   color: #1a2744;
 }
+
+/* ---- Sea Wave Effects (CSS Only - No SVG) ---- */
+
+/* Animated wave gradient overlay */
+@keyframes sea-wave {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+@keyframes sea-shimmer {
+  0%, 100% {
+    opacity: 0.3;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}
+
+@keyframes gentle-float {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-5px);
+  }
+}
+
+/* Subtle sea surface effect */
+.sea-effect {
+  position: relative;
+  overflow: hidden;
+}
+
+.sea-effect::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background:
+    linear-gradient(
+      180deg,
+      transparent 0%,
+      rgba(30, 111, 160, 0.05) 30%,
+      rgba(58, 140, 196, 0.08) 50%,
+      rgba(30, 111, 160, 0.05) 70%,
+      transparent 100%
+    );
+  animation: sea-shimmer 4s ease-in-out infinite;
+  z-index: 1;
+}
+
+/* Horizontal wave lines effect */
+.sea-waves {
+  position: relative;
+  overflow: hidden;
+}
+
+.sea-waves::after {
+  content: "";
+  position: absolute;
+  bottom: 0;
+  left: -50%;
+  right: -50%;
+  height: 100%;
+  pointer-events: none;
+  background:
+    repeating-linear-gradient(
+      0deg,
+      transparent,
+      transparent 40px,
+      rgba(255, 255, 255, 0.02) 40px,
+      rgba(255, 255, 255, 0.02) 41px
+    ),
+    repeating-linear-gradient(
+      0deg,
+      transparent,
+      transparent 80px,
+      rgba(201, 168, 76, 0.03) 80px,
+      rgba(201, 168, 76, 0.03) 81px
+    );
+  animation: sea-wave 20s ease-in-out infinite;
+  background-size: 200% 100%;
+  z-index: 1;
+}
+
+/* Deep water gradient effect */
+.sea-depth {
+  background:
+    linear-gradient(
+      180deg,
+      var(--color-ottoman-navy) 0%,
+      var(--color-ottoman-navy-dark) 50%,
+      #0d4a6f 100%
+    );
+}
+
+/* Surface light reflection */
+.sea-reflection {
+  position: relative;
+}
+
+.sea-reflection::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 30%;
+  pointer-events: none;
+  background: linear-gradient(
+    180deg,
+    rgba(255, 255, 255, 0.05) 0%,
+    transparent 100%
+  );
+  z-index: 1;
+}
+
+/* Floating animation for elements */
+.float-gentle {
+  animation: gentle-float 6s ease-in-out infinite;
+}

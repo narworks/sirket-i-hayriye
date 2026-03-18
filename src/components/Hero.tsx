@@ -78,7 +78,7 @@ export function Hero() {
           initial={{ opacity: 0, x: -60 }}
           animate={{ opacity: 1, x: 0 }}
           transition={{ duration: 1.5, delay: 1.3, ease: "easeOut" }}
-          className="mt-10 w-full max-w-md md:max-w-lg"
+          className="float-gentle mt-10 w-full max-w-md md:max-w-lg"
         >
           <SteamshipSVG className="h-auto w-full" />
         </motion.div>

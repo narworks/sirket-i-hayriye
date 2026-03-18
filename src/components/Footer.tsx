@@ -12,7 +12,7 @@ export function Footer() {
     <footer
       id="iletisim"
       ref={ref}
-      className="relative bg-ottoman-navy px-6 pt-16 pb-8"
+      className="sea-waves sea-reflection relative bg-ottoman-navy px-6 pt-16 pb-8"
     >
       <div className="mx-auto max-w-5xl">
         {/* İskele Haritası */}
