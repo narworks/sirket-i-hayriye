@@ -68,12 +68,14 @@ export const VideoPlayer = forwardRef<VideoPlayerHandle, VideoPlayerProps>(
   ) {
     const [isLoaded, setIsLoaded] = useState(false);
     const [showPlayOverlay, setShowPlayOverlay] = useState(true); // Mobilde tıklanabilir overlay
+    const [iframeKey, setIframeKey] = useState(() => Date.now()); // Her video için benzersiz key
     const videoRef = useRef<HTMLVideoElement>(null);
     const iframeRef = useRef<HTMLIFrameElement>(null);
     const progressIntervalRef = useRef<NodeJS.Timeout | null>(null);
     const startTimeRef = useRef<number>(0);
     const nearEndTriggeredRef = useRef(false);
     const youtubeReadyRef = useRef(false);
+    const playRetryRef = useRef<NodeJS.Timeout | null>(null);
 
     const isLocal = isLocalVideo(video.url);
     const videoId = !isLocal ? getYouTubeId(video.url) : null;
@@ -112,6 +114,7 @@ export const VideoPlayer = forwardRef<VideoPlayerHandle, VideoPlayerProps>(
     useEffect(() => {
       setIsLoaded(false);
       setShowPlayOverlay(true); // Yeni video için overlay göster
+      setIframeKey(Date.now()); // Yeni iframe key - cache bypass
       startTimeRef.current = 0;
       nearEndTriggeredRef.current = false;
       youtubeReadyRef.current = false;
@@ -119,6 +122,9 @@ export const VideoPlayer = forwardRef<VideoPlayerHandle, VideoPlayerProps>(
       return () => {
         if (progressIntervalRef.current) {
           clearInterval(progressIntervalRef.current);
+        }
+        if (playRetryRef.current) {
+          clearTimeout(playRetryRef.current);
         }
       };
     }, [video.id]);
@@ -282,16 +288,29 @@ export const VideoPlayer = forwardRef<VideoPlayerHandle, VideoPlayerProps>(
     // Overlay'e tıklandığında videoyu başlat (mobil için)
     const handlePlayOverlayClick = useCallback(() => {
       if (!isLocal && iframeRef.current) {
-        sendYouTubeCommand(iframeRef.current, "playVideo");
+        // Birden fazla playVideo komutu gönder (mobilde bazen ilki işe yaramıyor)
+        const sendPlayCommands = (attempt: number = 1) => {
+          if (attempt > 5 || !iframeRef.current) return;
 
-        // Ses durumunu ayarla
-        const shouldBeMuted = !hasStarted || isMuted;
-        sendYouTubeCommand(iframeRef.current, shouldBeMuted ? "mute" : "unMute");
+          sendYouTubeCommand(iframeRef.current, "playVideo");
 
-        if (!shouldBeMuted) {
-          sendYouTubeCommand(iframeRef.current, "setVolume", [Math.round(volume * 100)]);
-        }
+          // Ses durumunu ayarla
+          const shouldBeMuted = !hasStarted || isMuted;
+          sendYouTubeCommand(iframeRef.current, shouldBeMuted ? "mute" : "unMute");
 
+          if (!shouldBeMuted) {
+            sendYouTubeCommand(iframeRef.current, "setVolume", [Math.round(volume * 100)]);
+          }
+
+          // Birkaç deneme daha yap
+          if (attempt < 3) {
+            playRetryRef.current = setTimeout(() => {
+              sendPlayCommands(attempt + 1);
+            }, 300);
+          }
+        };
+
+        sendPlayCommands();
         setShowPlayOverlay(false);
       }
     }, [isLocal, hasStarted, isMuted, volume]);
@@ -307,8 +326,9 @@ export const VideoPlayer = forwardRef<VideoPlayerHandle, VideoPlayerProps>(
 
     // YouTube embed URL - HER ZAMAN mute=1 ile başla (mobil autoplay için zorunlu)
     // Ses durumu postMessage ile ayarlanacak
+    // iframeKey ile cache bypass
     const embedUrl = videoId
-      ? `https://www.youtube.com/embed/${videoId}?autoplay=1&mute=1&controls=0&showinfo=0&rel=0&modestbranding=1&playsinline=1&loop=0&fs=0&disablekb=1&enablejsapi=1&origin=${typeof window !== "undefined" ? window.location.origin : ""}`
+      ? `https://www.youtube.com/embed/${videoId}?autoplay=1&mute=1&controls=0&showinfo=0&rel=0&modestbranding=1&playsinline=1&loop=0&fs=0&disablekb=1&enablejsapi=1&origin=${typeof window !== "undefined" ? window.location.origin : ""}&_=${iframeKey}`
       : "";
 
     return (
@@ -348,7 +368,7 @@ export const VideoPlayer = forwardRef<VideoPlayerHandle, VideoPlayerProps>(
               <>
                 <iframe
                   ref={iframeRef}
-                  key={video.id}
+                  key={`${video.id}-${iframeKey}`}
                   src={embedUrl}
                   className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2"
                   style={{
