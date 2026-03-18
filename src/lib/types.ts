@@ -41,6 +41,7 @@ export type VideoGalleryAction =
   | { type: "GO_TO_VIDEO"; index: number }
   | { type: "TOGGLE_PLAY" }
   | { type: "TOGGLE_MUTE" }
+  | { type: "SET_MUTED"; muted: boolean }
   | { type: "SET_VOLUME"; volume: number }
   | { type: "SET_READY"; ready: boolean }
   | { type: "SET_PROGRESS"; progress: number }

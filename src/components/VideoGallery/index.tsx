@@ -95,12 +95,9 @@ export function VideoGallery() {
   }, [dispatch]);
 
   const handleToggleMute = useCallback(() => {
-    // Toggle mute via ref for immediate effect
-    if (videoPlayerRef.current) {
-      videoPlayerRef.current.setMuted(!state.isMuted);
-    }
+    // Sadece state'i güncelle, VideoPlayer useEffect ile takip edecek
     dispatch({ type: "TOGGLE_MUTE" });
-  }, [dispatch, state.isMuted]);
+  }, [dispatch]);
 
   const handleGoToVideo = useCallback(
     (index: number) => {

@@ -164,8 +164,13 @@ export const VideoPlayer = forwardRef<VideoPlayerHandle, VideoPlayerProps>(
 
     const handleLocalCanPlay = useCallback(() => {
       setIsLoaded(true);
+      // Video hazır olduğunda doğru muted state'ini ayarla
+      if (videoRef.current) {
+        videoRef.current.muted = isMuted;
+        videoRef.current.volume = volume;
+      }
       onReady();
-    }, [onReady]);
+    }, [onReady, isMuted, volume]);
 
     // Video yüklendiğinde otomatik oynat (sadece video değişince)
     useEffect(() => {
@@ -233,7 +238,7 @@ export const VideoPlayer = forwardRef<VideoPlayerHandle, VideoPlayerProps>(
                 }}
                 autoPlay
                 playsInline
-                muted={isMuted}
+                muted
                 onCanPlay={handleLocalCanPlay}
                 onTimeUpdate={handleLocalTimeUpdate}
                 onEnded={handleLocalEnded}

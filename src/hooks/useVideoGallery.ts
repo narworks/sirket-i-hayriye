@@ -57,6 +57,8 @@ function videoGalleryReducer(
       return { ...state, isPlaying: !state.isPlaying };
     case "TOGGLE_MUTE":
       return { ...state, isMuted: !state.isMuted };
+    case "SET_MUTED":
+      return { ...state, isMuted: action.muted };
     case "SET_VOLUME":
       return { ...state, volume: action.volume, isMuted: action.volume === 0 };
     case "SET_READY":
@@ -79,7 +81,8 @@ export function useVideoGallery() {
     const savedMuted = localStorage.getItem(VIDEO_GALLERY_CONFIG.storageKey);
     if (savedMuted !== null) {
       dispatch({
-        type: savedMuted === "true" ? "TOGGLE_MUTE" : "TOGGLE_MUTE",
+        type: "SET_MUTED",
+        muted: savedMuted === "true",
       });
     }
   }, []);
