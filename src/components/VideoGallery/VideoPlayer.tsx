@@ -130,7 +130,9 @@ export const VideoPlayer = forwardRef<VideoPlayerHandle, VideoPlayerProps>(
     // Video değiştiğinde state'leri sıfırla
     useEffect(() => {
       setIsLoaded(false);
-      setShowPlayOverlay(true); // Yeni video için overlay göster
+      // Kullanıcı zaten başlatmışsa (hasStarted=true), overlay gösterme
+      // Böylece video değişiminde otomatik başlar
+      setShowPlayOverlay(!hasStarted);
       setIframeKey(Date.now()); // Yeni iframe key - cache bypass
       startTimeRef.current = 0;
       nearEndTriggeredRef.current = false;
@@ -144,7 +146,7 @@ export const VideoPlayer = forwardRef<VideoPlayerHandle, VideoPlayerProps>(
           clearTimeout(playRetryRef.current);
         }
       };
-    }, [video.id]);
+    }, [video.id, hasStarted]);
 
     // Mute/volume kontrolü - sadece isLoaded olduktan sonra
     // Bu effect mute butonu değiştiğinde çalışır
@@ -267,10 +269,16 @@ export const VideoPlayer = forwardRef<VideoPlayerHandle, VideoPlayerProps>(
       setIsLoaded(true);
 
       // YouTube API'sinin hazır olması için birkaç deneme yap
+      // hasStarted=true ise daha agresif ol
+      const maxAttempts = hasStarted ? 10 : 5;
+      const baseDelay = hasStarted ? 200 : 300;
+
       const applyAudioState = (attempt: number = 1) => {
-        if (attempt > 5) {
-          // 5 denemeden sonra hala başlamadıysa overlay'i göster
-          setShowPlayOverlay(true);
+        if (attempt > maxAttempts) {
+          // Denemeler başarısız olduysa ve hasStarted false ise overlay göster
+          if (!hasStarted) {
+            setShowPlayOverlay(true);
+          }
           return;
         }
 
@@ -278,7 +286,7 @@ export const VideoPlayer = forwardRef<VideoPlayerHandle, VideoPlayerProps>(
           if (iframeRef.current?.contentWindow) {
             youtubeReadyRef.current = true;
 
-            // Videoyu oynat
+            // Videoyu oynat - birden fazla kez gönder (mobilde güvenilirlik için)
             sendYouTubeCommand(iframeRef.current, "playVideo");
 
             // Ses durumunu ayarla
@@ -289,13 +297,25 @@ export const VideoPlayer = forwardRef<VideoPlayerHandle, VideoPlayerProps>(
               sendYouTubeCommand(iframeRef.current, "setVolume", [Math.round(volume * 100)]);
             }
 
-            // Başarılı olduğunda overlay'i gizle (kısa gecikme ile)
-            setTimeout(() => setShowPlayOverlay(false), 500);
+            // hasStarted=true ise overlay'i hemen gizle
+            if (hasStarted) {
+              setShowPlayOverlay(false);
+            } else {
+              // İlk başlatma - biraz bekle
+              setTimeout(() => setShowPlayOverlay(false), 500);
+            }
+
+            // Ekstra güvenlik: hasStarted=true ise birkaç kez daha playVideo gönder
+            if (hasStarted && attempt < 3) {
+              setTimeout(() => {
+                sendYouTubeCommand(iframeRef.current, "playVideo");
+              }, 500);
+            }
           } else {
             // iframe henüz hazır değil, tekrar dene
             applyAudioState(attempt + 1);
           }
-        }, attempt * 300); // Her denemede biraz daha bekle
+        }, attempt * baseDelay);
       };
 
       applyAudioState();
