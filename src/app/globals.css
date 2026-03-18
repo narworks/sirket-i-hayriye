@@ -2,8 +2,10 @@
 
 @theme inline {
   /* Ottoman Color Palette */
-  --color-ottoman-navy: #1a2744;
-  --color-ottoman-navy-light: #2a3d5c;
+  /* Navy artık deniz mavisi - eski: #1a2744 */
+  --color-ottoman-navy: #1e6fa0;
+  --color-ottoman-navy-light: #3a8cc4;
+  --color-ottoman-navy-dark: #155a85;
   --color-ottoman-gold: #c9a84c;
   --color-ottoman-gold-light: #dbc278;
   --color-ottoman-gold-dark: #a88a2e;

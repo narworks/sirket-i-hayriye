@@ -27,18 +27,18 @@ export function Footer() {
           </h3>
           <div className="grid gap-8 md:grid-cols-2">
             <div>
-              <h4 className="mb-3 font-['Cinzel'] text-base tracking-widest text-ottoman-parchment/40 md:text-xs">
+              <h4 className="mb-3 font-['Cinzel'] text-base tracking-widest text-ottoman-parchment/60 md:text-xs">
                 AVRUPA YAKASI
               </h4>
-              <p className="font-['Source_Serif_4'] text-lg leading-loose text-ottoman-parchment/50 md:text-sm">
+              <p className="font-['Source_Serif_4'] text-lg leading-loose text-ottoman-parchment/70 md:text-sm">
                 {ISKELE_AVRUPA.join(" · ")}
               </p>
             </div>
             <div>
-              <h4 className="mb-3 font-['Cinzel'] text-base tracking-widest text-ottoman-parchment/40 md:text-xs">
+              <h4 className="mb-3 font-['Cinzel'] text-base tracking-widest text-ottoman-parchment/60 md:text-xs">
                 ANADOLU YAKASI
               </h4>
-              <p className="font-['Source_Serif_4'] text-lg leading-loose text-ottoman-parchment/50 md:text-sm">
+              <p className="font-['Source_Serif_4'] text-lg leading-loose text-ottoman-parchment/70 md:text-sm">
                 {ISKELE_ANADOLU.join(" · ")}
               </p>
             </div>
@@ -59,7 +59,7 @@ export function Footer() {
             </span>
           </div>
 
-          <p className="font-['Source_Serif_4'] text-base text-ottoman-parchment/30 md:text-xs">
+          <p className="font-['Source_Serif_4'] text-base text-ottoman-parchment/50 md:text-xs">
             Osmanlı Denizcilik Tarihine Saygıyla
           </p>
         </div>

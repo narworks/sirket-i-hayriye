@@ -18,7 +18,7 @@ function StatCounter({ value, label, suffix = "" }: { value: number; label: stri
         {isInView ? value : 0}
         {suffix}
       </motion.span>
-      <p className="mt-1 font-['Source_Serif_4'] text-lg text-ottoman-navy/60 md:text-sm">{label}</p>
+      <p className="mt-1 font-['Source_Serif_4'] text-lg text-ottoman-parchment/70 md:text-sm">{label}</p>
     </div>
   );
 }
