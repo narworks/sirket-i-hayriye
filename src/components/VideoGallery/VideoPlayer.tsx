@@ -58,7 +58,6 @@ export const VideoPlayer = forwardRef<VideoPlayerHandle, VideoPlayerProps>(
     const progressIntervalRef = useRef<NodeJS.Timeout | null>(null);
     const startTimeRef = useRef<number>(0);
     const nearEndTriggeredRef = useRef(false);
-    const initialMutedRef = useRef(isMuted);
 
     const isLocal = isLocalVideo(video.url);
     const videoId = !isLocal ? getYouTubeId(video.url) : null;
@@ -88,19 +87,18 @@ export const VideoPlayer = forwardRef<VideoPlayerHandle, VideoPlayerProps>(
       },
     }));
 
-    // Video değiştiğinde state'leri sıfırla
+    // Video değiştiğinde state'leri sıfırla (sadece video.id değişince)
     useEffect(() => {
       setIsLoaded(false);
       startTimeRef.current = 0;
       nearEndTriggeredRef.current = false;
-      initialMutedRef.current = isMuted;
 
       return () => {
         if (progressIntervalRef.current) {
           clearInterval(progressIntervalRef.current);
         }
       };
-    }, [video.id, isMuted]);
+    }, [video.id]);
 
     // Yerel video için mute/volume kontrolü
     useEffect(() => {
