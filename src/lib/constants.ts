@@ -105,14 +105,6 @@ export const VIDEO_GALLERY_CONFIG: VideoGalleryConfig = {
 // Not: Bu videolar örnek olarak eklenmiştir, kendi videolarınızla değiştirebilirsiniz
 // Video süreleri (saniye) - YouTube'dan kontrol edilip güncellenebilir
 export const GALLERY_VIDEOS: VideoContent[] = [
-  // Yerel video
-  {
-    id: "hanim-turk",
-    title: "Hanım Türk",
-    description: "Hanım Türk",
-    url: "/videos/hanim-turk.mp4",
-    year: "1851",
-  },
   // YouTube videoları
   {
     id: "osmanli-hikayesi-ilk-anonim-sirket",
@@ -120,6 +112,14 @@ export const GALLERY_VIDEOS: VideoContent[] = [
     description: "Osmanlı'nın İlk Anonim Şirketi",
     url: "https://www.youtube.com/watch?v=NgvOS4nGMTY",
     duration: 600,
+    year: "1851",
+  },
+  // Yerel video
+  {
+    id: "hanim-turk",
+    title: "Hanım Türk",
+    description: "Hanım Türk",
+    url: "/videos/hanim-turk.mp4",
     year: "1851",
   },
   {
