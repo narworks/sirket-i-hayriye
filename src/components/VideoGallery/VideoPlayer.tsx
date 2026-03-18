@@ -221,17 +221,28 @@ export const VideoPlayer = forwardRef<VideoPlayerHandle, VideoPlayerProps>(
 
     const handleYouTubeLoad = useCallback(() => {
       setIsLoaded(true);
-      // Yüklendikten sonra mevcut mute durumunu uygula
-      // (URL'de sadece hasStarted'a göre başlıyor, isMuted'ı burada uyguluyoruz)
+      // Yüklendikten sonra ses durumunu uygula
+      // hasStarted true VE isMuted false ise sesi aç, aksi halde sessiz kalsın
       if (iframeRef.current?.contentWindow) {
-        const func = isMuted ? "mute" : "unMute";
+        const shouldUnmute = hasStarted && !isMuted;
+        const func = shouldUnmute ? "unMute" : "mute";
         iframeRef.current.contentWindow.postMessage(
           JSON.stringify({ event: "command", func, args: [] }),
           "https://www.youtube.com"
         );
+        if (shouldUnmute) {
+          iframeRef.current.contentWindow.postMessage(
+            JSON.stringify({
+              event: "command",
+              func: "setVolume",
+              args: [Math.round(volume * 100)],
+            }),
+            "https://www.youtube.com"
+          );
+        }
       }
       onReady();
-    }, [onReady, isMuted]);
+    }, [onReady, hasStarted, isMuted, volume]);
 
     // YouTube için geçersiz video kontrolü
     if (!isLocal && !videoId) {
@@ -242,11 +253,10 @@ export const VideoPlayer = forwardRef<VideoPlayerHandle, VideoPlayerProps>(
       );
     }
 
-    // YouTube için: hasStarted true ise sesli başla (mute durumu onLoad'da postMessage ile uygulanacak)
-    // isMuted'ı URL'e dahil etmiyoruz çünkü değişince iframe yeniden yükleniyor
-    const muteParam = hasStarted ? 0 : 1;
+    // YouTube için: Mobil autoplay politikası nedeniyle HER ZAMAN mute=1 ile başla
+    // Ses durumu onLoad'da postMessage ile uygulanacak
     const embedUrl = videoId
-      ? `https://www.youtube.com/embed/${videoId}?autoplay=1&mute=${muteParam}&controls=0&showinfo=0&rel=0&modestbranding=1&playsinline=1&loop=0&fs=0&disablekb=1&enablejsapi=1&origin=${typeof window !== "undefined" ? window.location.origin : ""}`
+      ? `https://www.youtube.com/embed/${videoId}?autoplay=1&mute=1&controls=0&showinfo=0&rel=0&modestbranding=1&playsinline=1&loop=0&fs=0&disablekb=1&enablejsapi=1&origin=${typeof window !== "undefined" ? window.location.origin : ""}`
       : "";
 
     return (
