@@ -83,6 +83,12 @@ export const VideoPlayer = forwardRef<VideoPlayerHandle, VideoPlayerProps>(
       setMuted: (muted: boolean) => {
         if (isLocal && videoRef.current) {
           videoRef.current.muted = muted;
+        } else if (!isLocal && iframeRef.current?.contentWindow) {
+          const func = muted ? "mute" : "unMute";
+          iframeRef.current.contentWindow.postMessage(
+            JSON.stringify({ event: "command", func, args: [] }),
+            "https://www.youtube.com"
+          );
         }
       },
     }));
@@ -100,11 +106,26 @@ export const VideoPlayer = forwardRef<VideoPlayerHandle, VideoPlayerProps>(
       };
     }, [video.id]);
 
-    // Yerel video için mute/volume kontrolü - video element varsa hemen çalışsın
+    // Mute/volume kontrolü - yerel video ve YouTube için
     useEffect(() => {
       if (isLocal && videoRef.current) {
         videoRef.current.muted = isMuted;
         videoRef.current.volume = volume;
+      } else if (!isLocal && iframeRef.current?.contentWindow) {
+        // YouTube iframe'e postMessage ile mute/unmute komutu gönder
+        const func = isMuted ? "mute" : "unMute";
+        iframeRef.current.contentWindow.postMessage(
+          JSON.stringify({ event: "command", func, args: [] }),
+          "https://www.youtube.com"
+        );
+        iframeRef.current.contentWindow.postMessage(
+          JSON.stringify({
+            event: "command",
+            func: "setVolume",
+            args: [Math.round(volume * 100)],
+          }),
+          "https://www.youtube.com"
+        );
       }
     }, [isLocal, isMuted, volume]);
 
@@ -173,15 +194,29 @@ export const VideoPlayer = forwardRef<VideoPlayerHandle, VideoPlayerProps>(
     }, [onReady, isMuted, volume]);
 
     // Video yüklendiğinde otomatik oynat (sadece video değişince)
+    // Tarayıcı autoplay politikası gereği önce sessiz başlatıp, sonra gerçek ses durumunu uygula
     useEffect(() => {
-      if (isLocal && videoRef.current) {
-        const playPromise = videoRef.current.play();
-        if (playPromise !== undefined) {
-          playPromise.catch(() => {
+      if (!isLocal || !videoRef.current) return;
+
+      const video = videoRef.current;
+      // Autoplay için önce sessiz başlat
+      video.muted = true;
+
+      const playPromise = video.play();
+      if (playPromise !== undefined) {
+        playPromise
+          .then(() => {
+            // Oynatma başladıktan sonra gerçek ses durumunu uygula
+            if (videoRef.current) {
+              videoRef.current.muted = isMuted;
+              videoRef.current.volume = volume;
+            }
+          })
+          .catch(() => {
             console.log("Autoplay blocked, waiting for user interaction");
           });
-        }
       }
+      // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [isLocal, video.id]);
 
     const handleYouTubeLoad = useCallback(() => {
@@ -201,7 +236,7 @@ export const VideoPlayer = forwardRef<VideoPlayerHandle, VideoPlayerProps>(
     // YouTube için: hasStarted true ise sesli, değilse sessiz başla
     const muteParam = hasStarted ? 0 : 1;
     const embedUrl = videoId
-      ? `https://www.youtube.com/embed/${videoId}?autoplay=1&mute=${muteParam}&controls=0&showinfo=0&rel=0&modestbranding=1&playsinline=1&loop=0&fs=0&disablekb=1&enablejsapi=0`
+      ? `https://www.youtube.com/embed/${videoId}?autoplay=1&mute=${muteParam}&controls=0&showinfo=0&rel=0&modestbranding=1&playsinline=1&loop=0&fs=0&disablekb=1&enablejsapi=1&origin=${typeof window !== "undefined" ? window.location.origin : ""}`
       : "";
 
     return (
@@ -236,9 +271,7 @@ export const VideoPlayer = forwardRef<VideoPlayerHandle, VideoPlayerProps>(
                   width: "177.78vh",
                   height: "56.25vw",
                 }}
-                autoPlay
                 playsInline
-                muted
                 onCanPlay={handleLocalCanPlay}
                 onTimeUpdate={handleLocalTimeUpdate}
                 onEnded={handleLocalEnded}
