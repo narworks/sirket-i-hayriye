@@ -105,7 +105,7 @@ export const VIDEO_GALLERY_CONFIG: VideoGalleryConfig = {
 // Not: Bu videolar örnek olarak eklenmiştir, kendi videolarınızla değiştirebilirsiniz
 // Video süreleri (saniye) - YouTube'dan kontrol edilip güncellenebilir
 export const GALLERY_VIDEOS: VideoContent[] = [
-  // Yerel videolar
+  // Yerel video
   {
     id: "hanim-turk",
     title: "Hanım Türk",
@@ -113,22 +113,7 @@ export const GALLERY_VIDEOS: VideoContent[] = [
     url: "/videos/hanim-turk.mp4",
     year: "1851",
   },
-  {
-    id: "borsa-istanbul",
-    title: "Borsa İstanbul",
-    description: "Borsa İstanbul Tanıtım",
-    url: "/videos/borsa-istanbul.mp4",
-    year: "1851",
-  },
   // YouTube videoları
-  {
-    id: "sirket-hayriye-intro",
-    title: "Şirket-i Hayriye",
-    description: "Şirket-i Hayriye Tanıtım",
-    url: "https://www.youtube.com/watch?v=uDpTTzjqaK4",
-    duration: 180,
-    year: "1851",
-  },
   {
     id: "osmanli-hikayesi-ilk-anonim-sirket",
     title: "Şirket-i Hayriye'nin Hikayesi",
@@ -144,13 +129,6 @@ export const GALLERY_VIDEOS: VideoContent[] = [
     url: "https://www.youtube.com/watch?v=H5Tto1TlmF0",
     duration: 420,
     year: "1854",
-  },
-  {
-    id: "tuz-kaynalari-delice",
-    title: "Tuz Kaynaları Delice",
-    description: "Tuz Kaynaları Delice",
-    url: "/videos/tuz_kaynaklari_delice.mp4",
-    year: "1851",
   },
   {
     id: "sirket-hayriye-belgesel",
