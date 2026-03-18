@@ -221,26 +221,28 @@ export const VideoPlayer = forwardRef<VideoPlayerHandle, VideoPlayerProps>(
 
     const handleYouTubeLoad = useCallback(() => {
       setIsLoaded(true);
-      // Yüklendikten sonra ses durumunu uygula
-      // hasStarted true VE isMuted false ise sesi aç, aksi halde sessiz kalsın
-      if (iframeRef.current?.contentWindow) {
-        const shouldUnmute = hasStarted && !isMuted;
-        const func = shouldUnmute ? "unMute" : "mute";
-        iframeRef.current.contentWindow.postMessage(
-          JSON.stringify({ event: "command", func, args: [] }),
-          "https://www.youtube.com"
-        );
-        if (shouldUnmute) {
+      // YouTube API'sinin hazır olması için kısa bir gecikme
+      // Mobilde iframe yüklense bile API hemen hazır olmayabiliyor
+      setTimeout(() => {
+        if (iframeRef.current?.contentWindow) {
+          const shouldUnmute = hasStarted && !isMuted;
+          const func = shouldUnmute ? "unMute" : "mute";
           iframeRef.current.contentWindow.postMessage(
-            JSON.stringify({
-              event: "command",
-              func: "setVolume",
-              args: [Math.round(volume * 100)],
-            }),
+            JSON.stringify({ event: "command", func, args: [] }),
             "https://www.youtube.com"
           );
+          if (shouldUnmute) {
+            iframeRef.current.contentWindow.postMessage(
+              JSON.stringify({
+                event: "command",
+                func: "setVolume",
+                args: [Math.round(volume * 100)],
+              }),
+              "https://www.youtube.com"
+            );
+          }
         }
-      }
+      }, 500);
       onReady();
     }, [onReady, hasStarted, isMuted, volume]);
 
@@ -276,46 +278,41 @@ export const VideoPlayer = forwardRef<VideoPlayerHandle, VideoPlayerProps>(
             </div>
           )}
 
-          {/* Video container - tam ekran kaplama */}
-          <div className="absolute inset-0 overflow-hidden">
+          {/* Video container - tam ekran kaplama (portrait ve landscape uyumlu) */}
+          <div className="absolute inset-0 flex items-center justify-center overflow-hidden">
             {isLocal ? (
               // Yerel video dosyası
               <video
                 ref={videoRef}
                 key={video.id}
                 src={video.url}
-                className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 object-cover"
-                style={{
-                  minWidth: "100vw",
-                  minHeight: "100vh",
-                  width: "177.78vh",
-                  height: "56.25vw",
-                }}
+                className="h-full w-full object-cover"
                 playsInline
                 onCanPlay={handleLocalCanPlay}
                 onTimeUpdate={handleLocalTimeUpdate}
                 onEnded={handleLocalEnded}
               />
             ) : (
-              // YouTube iframe
-              <iframe
-                ref={iframeRef}
-                key={video.id}
-                src={embedUrl}
-                className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2"
-                style={{
-                  border: "none",
-                  pointerEvents: "none",
-                  minWidth: "100vw",
-                  minHeight: "100vh",
-                  width: "177.78vh",
-                  height: "56.25vw",
-                }}
-                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                allowFullScreen
-                onLoad={handleYouTubeLoad}
-                title={video.title}
-              />
+              // YouTube iframe - aspect ratio koruyarak ekranı kapla
+              <div className="relative h-full w-full">
+                <iframe
+                  ref={iframeRef}
+                  key={video.id}
+                  src={embedUrl}
+                  className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2"
+                  style={{
+                    border: "none",
+                    pointerEvents: "none",
+                    // Portrait modda yüksekliği, landscape modda genişliği baz al
+                    width: "max(100vw, 177.78vh)",
+                    height: "max(100vh, 56.25vw)",
+                  }}
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                  allowFullScreen
+                  onLoad={handleYouTubeLoad}
+                  title={video.title}
+                />
+              </div>
             )}
           </div>
         </motion.div>
