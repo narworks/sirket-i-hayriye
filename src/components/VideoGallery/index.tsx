@@ -123,6 +123,7 @@ export function VideoGallery() {
             video={currentVideo}
             isPlaying={state.isPlaying}
             isMuted={state.isMuted}
+            hasStarted={state.hasStarted}
             volume={state.volume}
             onReady={handleReady}
             onProgress={handleProgress}

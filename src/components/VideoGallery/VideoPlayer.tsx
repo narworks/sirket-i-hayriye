@@ -15,6 +15,7 @@ interface VideoPlayerProps {
   video: VideoContent;
   isPlaying: boolean;
   isMuted: boolean;
+  hasStarted: boolean; // Kullanıcı sesi açtı mı?
   volume: number;
   onReady: () => void;
   onProgress: (progress: number, duration: number) => void;
@@ -48,7 +49,7 @@ function isLocalVideo(url: string): boolean {
 
 export const VideoPlayer = forwardRef<VideoPlayerHandle, VideoPlayerProps>(
   function VideoPlayer(
-    { video, isMuted, volume, onReady, onProgress, onEnded, onNearEnd },
+    { video, isMuted, hasStarted, volume, onReady, onProgress, onEnded, onNearEnd },
     ref
   ) {
     const [isLoaded, setIsLoaded] = useState(false);
@@ -168,11 +169,11 @@ export const VideoPlayer = forwardRef<VideoPlayerHandle, VideoPlayerProps>(
       onReady();
     }, [onReady]);
 
-    // Video yüklendiğinde otomatik oynat (muted)
+    // Video yüklendiğinde otomatik oynat
     useEffect(() => {
       if (isLocal && videoRef.current) {
-        // Mobil için: Her zaman muted olarak başla (autoplay policy)
-        videoRef.current.muted = true;
+        // hasStarted true ise sesli, değilse sessiz başla
+        videoRef.current.muted = !hasStarted;
         const playPromise = videoRef.current.play();
         if (playPromise !== undefined) {
           playPromise.catch(() => {
@@ -180,7 +181,7 @@ export const VideoPlayer = forwardRef<VideoPlayerHandle, VideoPlayerProps>(
           });
         }
       }
-    }, [isLocal, video.id]);
+    }, [isLocal, video.id, hasStarted]);
 
     const handleYouTubeLoad = useCallback(() => {
       setIsLoaded(true);
@@ -196,9 +197,10 @@ export const VideoPlayer = forwardRef<VideoPlayerHandle, VideoPlayerProps>(
       );
     }
 
-    // YouTube için her zaman muted başla (mobil uyumluluk)
+    // YouTube için: hasStarted true ise sesli, değilse sessiz başla
+    const muteParam = hasStarted ? 0 : 1;
     const embedUrl = videoId
-      ? `https://www.youtube.com/embed/${videoId}?autoplay=1&mute=1&controls=0&showinfo=0&rel=0&modestbranding=1&playsinline=1&loop=0&fs=0&disablekb=1&enablejsapi=0`
+      ? `https://www.youtube.com/embed/${videoId}?autoplay=1&mute=${muteParam}&controls=0&showinfo=0&rel=0&modestbranding=1&playsinline=1&loop=0&fs=0&disablekb=1&enablejsapi=0`
       : "";
 
     return (
