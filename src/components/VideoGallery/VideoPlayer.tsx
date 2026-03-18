@@ -243,6 +243,12 @@ export const VideoPlayer = forwardRef<VideoPlayerHandle, VideoPlayerProps>(
 
       const videoElement = videoRef.current;
 
+      // Video zaten hazırsa (cache'den yüklenmiş olabilir)
+      // readyState: 0=HAVE_NOTHING, 1=HAVE_METADATA, 2=HAVE_CURRENT_DATA, 3=HAVE_FUTURE_DATA, 4=HAVE_ENOUGH_DATA
+      if (videoElement.readyState >= 3) {
+        setIsLoaded(true);
+      }
+
       // Mobil autoplay için önce sessiz başlat
       videoElement.muted = true;
 
@@ -250,7 +256,10 @@ export const VideoPlayer = forwardRef<VideoPlayerHandle, VideoPlayerProps>(
       if (playPromise !== undefined) {
         playPromise
           .then(() => {
-            // Oynatma başladıktan sonra gerçek ses durumunu uygula
+            // Oynatma başladı - video kesinlikle hazır
+            setIsLoaded(true);
+
+            // Gerçek ses durumunu uygula
             if (videoRef.current) {
               const shouldBeMuted = !hasStarted || isMuted;
               videoRef.current.muted = shouldBeMuted;
