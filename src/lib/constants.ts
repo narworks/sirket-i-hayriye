@@ -101,20 +101,17 @@ export const VIDEO_GALLERY_CONFIG: VideoGalleryConfig = {
   storageKey: "sirket-galeri-muted", // Ses tercihi için
 };
 
-// Atmosferik İstanbul Boğazı videoları
-// Not: Bu videolar örnek olarak eklenmiştir, kendi videolarınızla değiştirebilirsiniz
-// Video süreleri (saniye) - YouTube'dan kontrol edilip güncellenebilir
+// Galeri Videoları
+// Tüm videolar yerel dosya olarak public/videos/ klasöründe
+// Mobilde YouTube embed sorunları nedeniyle yerel video tercih ediliyor
 export const GALLERY_VIDEOS: VideoContent[] = [
-  // YouTube videoları
   {
     id: "osmanli-hikayesi-ilk-anonim-sirket",
     title: "Şirket-i Hayriye'nin Hikayesi",
     description: "Osmanlı'nın İlk Anonim Şirketi",
-    url: "https://www.youtube.com/watch?v=NgvOS4nGMTY",
-    duration: 600,
+    url: "/videos/osmanli-hikayesi.mp4",
     year: "1851",
   },
-  // Yerel video
   {
     id: "hanim-turk",
     title: "Hanım Türk",
@@ -126,16 +123,14 @@ export const GALLERY_VIDEOS: VideoContent[] = [
     id: "bogaziçi-mimari",
     title: "Boğaziçi'nin Mimarı",
     description: "Boğaziçi'nin Mimarı",
-    url: "https://www.youtube.com/watch?v=H5Tto1TlmF0",
-    duration: 420,
+    url: "/videos/bogazici-mimari.mp4",
     year: "1854",
   },
   {
     id: "sirket-hayriye-belgesel",
     title: "Şirket-i Hayriye Belgesel",
     description: "Şirket-i Hayriye Belgesel",
-    url: "https://www.youtube.com/watch?v=03jJJ_9vkuY",
-    duration: 300,
+    url: "/videos/sirket-hayriye-belgesel.mp4",
     year: "1851",
   },
 ];

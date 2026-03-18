@@ -424,11 +424,12 @@ export const VideoPlayer = forwardRef<VideoPlayerHandle, VideoPlayerProps>(
           <div className="absolute inset-0 overflow-hidden">
             {isLocal ? (
               // Yerel video dosyası
+              // Portrait: object-contain (letterbox), Landscape: object-cover (tam ekran)
               <video
                 ref={videoRef}
                 key={video.id}
                 src={video.url}
-                className="absolute inset-0 h-full w-full object-cover"
+                className={`absolute inset-0 h-full w-full ${isPortrait ? "object-contain" : "object-cover"}`}
                 playsInline
                 webkit-playsinline="true"
                 onCanPlay={handleLocalCanPlay}
