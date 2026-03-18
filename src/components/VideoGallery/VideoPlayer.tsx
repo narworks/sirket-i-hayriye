@@ -442,6 +442,8 @@ export const VideoPlayer = forwardRef<VideoPlayerHandle, VideoPlayerProps>(
                 playsInline
                 webkit-playsinline="true"
                 onCanPlay={handleLocalCanPlay}
+                onLoadedData={() => setIsLoaded(true)}
+                onPlaying={() => setIsLoaded(true)}
                 onTimeUpdate={handleLocalTimeUpdate}
                 onEnded={handleLocalEnded}
               />
