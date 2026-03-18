@@ -167,11 +167,9 @@ export const VideoPlayer = forwardRef<VideoPlayerHandle, VideoPlayerProps>(
       onReady();
     }, [onReady]);
 
-    // Video yüklendiğinde otomatik oynat
+    // Video yüklendiğinde otomatik oynat (sadece video değişince)
     useEffect(() => {
       if (isLocal && videoRef.current) {
-        // hasStarted true ise sesli, değilse sessiz başla
-        videoRef.current.muted = !hasStarted;
         const playPromise = videoRef.current.play();
         if (playPromise !== undefined) {
           playPromise.catch(() => {
@@ -179,7 +177,7 @@ export const VideoPlayer = forwardRef<VideoPlayerHandle, VideoPlayerProps>(
           });
         }
       }
-    }, [isLocal, video.id, hasStarted]);
+    }, [isLocal, video.id]);
 
     const handleYouTubeLoad = useCallback(() => {
       setIsLoaded(true);
@@ -235,7 +233,7 @@ export const VideoPlayer = forwardRef<VideoPlayerHandle, VideoPlayerProps>(
                 }}
                 autoPlay
                 playsInline
-                muted
+                muted={isMuted}
                 onCanPlay={handleLocalCanPlay}
                 onTimeUpdate={handleLocalTimeUpdate}
                 onEnded={handleLocalEnded}
