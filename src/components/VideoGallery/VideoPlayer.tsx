@@ -264,29 +264,69 @@ export const VideoPlayer = forwardRef<VideoPlayerHandle, VideoPlayerProps>(
       // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [isLocal, video.id]);
 
+    // YouTube'dan gelen mesajları dinle (onReady, onStateChange vb.)
+    useEffect(() => {
+      if (isLocal) return;
+
+      const handleMessage = (event: MessageEvent) => {
+        if (event.origin !== "https://www.youtube.com") return;
+
+        try {
+          const data = typeof event.data === "string" ? JSON.parse(event.data) : event.data;
+
+          // YouTube player hazır olduğunda
+          if (data.event === "onReady" || data.info?.playerState !== undefined) {
+            youtubeReadyRef.current = true;
+
+            // Player hazır, videoyu başlat
+            if (iframeRef.current) {
+              sendYouTubeCommand(iframeRef.current, "playVideo");
+
+              const shouldBeMuted = !hasStarted || isMuted;
+              sendYouTubeCommand(iframeRef.current, shouldBeMuted ? "mute" : "unMute");
+
+              if (!shouldBeMuted) {
+                sendYouTubeCommand(iframeRef.current, "setVolume", [Math.round(volume * 100)]);
+              }
+
+              if (hasStarted) {
+                setShowPlayOverlay(false);
+              }
+            }
+          }
+        } catch {
+          // JSON parse hatası - yoksay
+        }
+      };
+
+      window.addEventListener("message", handleMessage);
+      return () => window.removeEventListener("message", handleMessage);
+    }, [isLocal, hasStarted, isMuted, volume]);
+
     // YouTube iframe yüklendiğinde
     const handleYouTubeLoad = useCallback(() => {
       setIsLoaded(true);
 
-      // YouTube API'sinin hazır olması için birkaç deneme yap
-      // hasStarted=true ise daha agresif ol
-      const maxAttempts = hasStarted ? 10 : 5;
-      const baseDelay = hasStarted ? 200 : 300;
+      // YouTube API'sinin hazır olması için daha agresif retry
+      // Mobilde iframe yüklense bile player hazır olmayabilir
+      const startPlayback = () => {
+        let attempts = 0;
+        const maxAttempts = 30; // 30 x 150ms = 4.5 saniye
+        const interval = 150;
 
-      const applyAudioState = (attempt: number = 1) => {
-        if (attempt > maxAttempts) {
-          // Denemeler başarısız olduysa ve hasStarted false ise overlay göster
-          if (!hasStarted) {
-            setShowPlayOverlay(true);
+        const tryPlay = () => {
+          attempts++;
+
+          if (attempts > maxAttempts) {
+            // Çok fazla deneme, overlay göster (eğer hasStarted false ise)
+            if (!hasStarted) {
+              setShowPlayOverlay(true);
+            }
+            return;
           }
-          return;
-        }
 
-        setTimeout(() => {
           if (iframeRef.current?.contentWindow) {
-            youtubeReadyRef.current = true;
-
-            // Videoyu oynat - birden fazla kez gönder (mobilde güvenilirlik için)
+            // playVideo komutu gönder
             sendYouTubeCommand(iframeRef.current, "playVideo");
 
             // Ses durumunu ayarla
@@ -297,28 +337,23 @@ export const VideoPlayer = forwardRef<VideoPlayerHandle, VideoPlayerProps>(
               sendYouTubeCommand(iframeRef.current, "setVolume", [Math.round(volume * 100)]);
             }
 
-            // hasStarted=true ise overlay'i hemen gizle
-            if (hasStarted) {
+            // hasStarted=true ise overlay'i gizle
+            if (hasStarted && attempts >= 3) {
               setShowPlayOverlay(false);
-            } else {
-              // İlk başlatma - biraz bekle
-              setTimeout(() => setShowPlayOverlay(false), 500);
             }
-
-            // Ekstra güvenlik: hasStarted=true ise birkaç kez daha playVideo gönder
-            if (hasStarted && attempt < 3) {
-              setTimeout(() => {
-                sendYouTubeCommand(iframeRef.current, "playVideo");
-              }, 500);
-            }
-          } else {
-            // iframe henüz hazır değil, tekrar dene
-            applyAudioState(attempt + 1);
           }
-        }, attempt * baseDelay);
+
+          // Devam et - belki player henüz hazır değildi
+          if (attempts < maxAttempts) {
+            playRetryRef.current = setTimeout(tryPlay, interval);
+          }
+        };
+
+        // İlk denemeyi biraz bekleyerek başlat
+        playRetryRef.current = setTimeout(tryPlay, 300);
       };
 
-      applyAudioState();
+      startPlayback();
       onReady();
     }, [onReady, hasStarted, isMuted, volume]);
 
