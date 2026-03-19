@@ -16,10 +16,8 @@ export function VideoGallery() {
     currentVideo,
     totalVideos,
     hasMultipleVideos,
-    config,
   } = useVideoGallery();
 
-  const [showSkipButton, setShowSkipButton] = useState(false);
   const [isMounted, setIsMounted] = useState(false);
   const [videoChangeCount, setVideoChangeCount] = useState(0); // Her video değişiminde artır
   const videoPlayerRef = useRef<VideoPlayerHandle>(null);
@@ -29,20 +27,8 @@ export function VideoGallery() {
     setIsMounted(true);
   }, []);
 
-  // Skip butonu için zamanlayıcı
+  // Video değişince sayacı artır
   useEffect(() => {
-    if (!state.isOpen || !state.isPlaying || !state.hasStarted) return;
-
-    const timeout = setTimeout(() => {
-      setShowSkipButton(true);
-    }, config.skipButtonDelay * 1000);
-
-    return () => clearTimeout(timeout);
-  }, [state.isOpen, state.isPlaying, state.hasStarted, state.currentIndex, config.skipButtonDelay]);
-
-  // Video değişince skip butonunu sıfırla ve sayacı artır
-  useEffect(() => {
-    setShowSkipButton(false);
     setVideoChangeCount((c) => c + 1);
   }, [state.currentIndex]);
 
@@ -54,10 +40,6 @@ export function VideoGallery() {
     }
     // Sonra state'i güncelle
     dispatch({ type: "START_WITH_SOUND" });
-  }, [dispatch]);
-
-  const handleClose = useCallback(() => {
-    dispatch({ type: "CLOSE" });
   }, [dispatch]);
 
   const handleReady = useCallback(() => {
@@ -91,10 +73,6 @@ export function VideoGallery() {
       dispatch({ type: "TOGGLE_LOGO" });
     }
   }, [dispatch, hasMultipleVideos, state.currentIndex, totalVideos]);
-
-  const handleSkip = useCallback(() => {
-    dispatch({ type: "CLOSE" });
-  }, [dispatch]);
 
   const handleToggleMute = useCallback(() => {
     // Sadece state'i güncelle, VideoPlayer useEffect ile takip edecek
@@ -140,10 +118,7 @@ export function VideoGallery() {
           {/* Kontroller - sadece ses açıldıktan sonra göster */}
           {state.hasStarted && (
             <VideoControls
-              showSkipButton={showSkipButton}
               isMuted={state.isMuted}
-              onClose={handleClose}
-              onSkip={handleSkip}
               onToggleMute={handleToggleMute}
             />
           )}

@@ -4,18 +4,12 @@ import { motion, AnimatePresence } from "framer-motion";
 import { useState, useEffect } from "react";
 
 interface VideoControlsProps {
-  showSkipButton: boolean;
   isMuted: boolean;
-  onClose: () => void;
-  onSkip: () => void;
   onToggleMute: () => void;
 }
 
 export function VideoControls({
-  showSkipButton,
   isMuted,
-  onClose,
-  onSkip,
   onToggleMute,
 }: VideoControlsProps) {
   const [showControls, setShowControls] = useState(true);
@@ -49,18 +43,18 @@ export function VideoControls({
           transition={{ duration: 0.3 }}
           className="pointer-events-none absolute inset-0 z-30"
         >
-          {/* Sağ üst - Kapat butonu */}
+          {/* Sağ üst - Sadece ses kontrolü */}
           <div className="pointer-events-auto absolute top-6 right-6 flex items-center gap-3">
             {/* Ses kontrolü */}
             <button
               onClick={onToggleMute}
-              className="flex h-12 w-12 items-center justify-center rounded-full bg-black/50 text-white backdrop-blur-sm transition-all hover:bg-ottoman-gold/80"
+              className="flex h-14 w-14 items-center justify-center rounded-full bg-black/50 text-white backdrop-blur-sm transition-all hover:bg-ottoman-gold/80 md:h-16 md:w-16"
               aria-label={isMuted ? "Sesi aç" : "Sesi kapat"}
             >
               {isMuted ? (
                 // Muted icon
                 <svg
-                  className="h-6 w-6"
+                  className="h-7 w-7 md:h-8 md:w-8"
                   fill="none"
                   viewBox="0 0 24 24"
                   stroke="currentColor"
@@ -81,7 +75,7 @@ export function VideoControls({
               ) : (
                 // Unmuted icon
                 <svg
-                  className="h-6 w-6"
+                  className="h-7 w-7 md:h-8 md:w-8"
                   fill="none"
                   viewBox="0 0 24 24"
                   stroke="currentColor"
@@ -95,56 +89,7 @@ export function VideoControls({
                 </svg>
               )}
             </button>
-
-            {/* Kapat butonu */}
-            <button
-              onClick={onClose}
-              className="flex h-12 w-12 items-center justify-center rounded-full bg-black/50 text-white backdrop-blur-sm transition-all hover:bg-ottoman-red/80"
-              aria-label="Galeriyi kapat"
-            >
-              <svg
-                className="h-6 w-6"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M6 18L18 6M6 6l12 12"
-                />
-              </svg>
-            </button>
           </div>
-
-          {/* Sağ alt - Atla butonu */}
-          <AnimatePresence>
-            {showSkipButton && (
-              <motion.button
-                initial={{ opacity: 0, x: 20 }}
-                animate={{ opacity: 1, x: 0 }}
-                exit={{ opacity: 0, x: 20 }}
-                onClick={onSkip}
-                className="pointer-events-auto absolute right-6 bottom-24 flex items-center gap-2 rounded-full bg-black/50 px-6 py-3 text-white backdrop-blur-sm transition-all hover:bg-black/70"
-              >
-                <span className="font-['Source_Serif_4'] text-sm">Atla</span>
-                <svg
-                  className="h-4 w-4"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M13 5l7 7-7 7M5 5l7 7-7 7"
-                  />
-                </svg>
-              </motion.button>
-            )}
-          </AnimatePresence>
         </motion.div>
       )}
     </AnimatePresence>
