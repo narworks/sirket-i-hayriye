@@ -35,26 +35,30 @@ export function WelcomeScreen({ onStart }: WelcomeScreenProps) {
       {/* Sesi Aç butonu - alt orta */}
       <motion.button
         onClick={onStart}
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.5, duration: 0.6 }}
-        className="absolute bottom-16 left-1/2 z-20 flex -translate-x-1/2 items-center gap-4 rounded-full border-2 border-ottoman-gold/60 bg-ottoman-navy/90 px-10 py-5 text-ottoman-parchment shadow-2xl backdrop-blur-sm transition-all hover:border-ottoman-gold hover:bg-ottoman-navy md:bottom-24 md:px-12 md:py-6"
+        initial={{ opacity: 0, scale: 0.9 }}
+        animate={{ opacity: 1, scale: 1 }}
+        transition={{ delay: 0.3, duration: 0.5 }}
+        whileHover={{ scale: 1.05 }}
+        whileTap={{ scale: 0.95 }}
+        className="absolute bottom-12 left-1/2 z-20 flex -translate-x-1/2 flex-col items-center gap-4 rounded-2xl border-2 border-white/30 bg-black/70 px-12 py-8 text-white shadow-2xl backdrop-blur-sm transition-all hover:border-white/50 hover:bg-black/80 md:bottom-20 md:gap-5 md:px-16 md:py-10"
       >
-        <svg
-          className="h-8 w-8 md:h-10 md:w-10"
-          fill="none"
-          viewBox="0 0 24 24"
-          stroke="currentColor"
+        {/* Ses ikonu - nabız animasyonu */}
+        <motion.div
+          animate={{ scale: [1, 1.1, 1] }}
+          transition={{ repeat: Infinity, duration: 2, ease: "easeInOut" }}
         >
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeWidth={2}
-            d="M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 12.728M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z"
-          />
-        </svg>
-        <span className="font-['Playfair_Display'] text-xl font-semibold tracking-wide md:text-2xl">
-          Sesi Aç
+          <svg
+            className="h-14 w-14 md:h-20 md:w-20"
+            fill="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z" />
+          </svg>
+        </motion.div>
+
+        {/* Yazı */}
+        <span className="text-2xl font-bold tracking-wide md:text-3xl">
+          SESİ AÇ
         </span>
       </motion.button>
     </motion.div>
