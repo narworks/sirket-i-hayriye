@@ -87,11 +87,14 @@ export const VideoPlayer = forwardRef<VideoPlayerHandle, VideoPlayerProps>(
       play: async () => {
         if (isLocal && videoRef.current) {
           try {
+            // Video her zaman 0:00'dan başlamalı
+            videoRef.current.currentTime = 0;
             await videoRef.current.play();
           } catch (e) {
             console.log("Play failed:", e);
           }
         } else if (!isLocal) {
+          sendYouTubeCommand(iframeRef.current, "seekTo", [0, true]);
           sendYouTubeCommand(iframeRef.current, "playVideo");
         }
       },
@@ -244,6 +247,9 @@ export const VideoPlayer = forwardRef<VideoPlayerHandle, VideoPlayerProps>(
       if (!isLocal || !videoRef.current) return;
 
       const videoElement = videoRef.current;
+
+      // Video her zaman 0:00'dan başlamalı
+      videoElement.currentTime = 0;
 
       // Video zaten hazırsa (cache'den yüklenmiş olabilir)
       // readyState: 0=HAVE_NOTHING, 1=HAVE_METADATA, 2=HAVE_CURRENT_DATA, 3=HAVE_FUTURE_DATA, 4=HAVE_ENOUGH_DATA
